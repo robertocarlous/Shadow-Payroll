@@ -30,3 +30,6 @@ midnight-level-db/
 
 .vercel/
 coverage/
+
+# Claude Code harness-local state
+.claude/
