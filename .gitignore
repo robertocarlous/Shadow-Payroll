@@ -9,5 +9,6 @@ build/
 contract/src/managed/
 credentials/
 *.credential.json
+.payroll/
 .vercel/
 coverage/
