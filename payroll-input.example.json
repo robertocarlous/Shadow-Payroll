@@ -1,0 +1,5 @@
+[
+  { "payeeId": "alice", "amount": 100 },
+  { "payeeId": "bob", "amount": 250 },
+  { "payeeId": "carol", "amount": 75 }
+]
