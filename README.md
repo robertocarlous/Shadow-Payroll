@@ -4,10 +4,46 @@
 
 [![CI](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml/badge.svg)](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml)
 
-- **Live Preprod demo:** _TODO: add Vercel URL once deployed_
-- **Contract address (Preprod):** _TODO: add after `npm run setup -- --network preprod`_
+- **Audit dashboard:** https://shadow-payroll.vercel.app (live, currently showing "not connected" — see [Public network deployment status](#public-network-deployment-status) below)
+- **Contract address (Preview/Preprod):** _TODO: add once public-network deployment completes_
 - **Product X profile:** _TODO: add link_
 - **Demo video:** _TODO: add link_
+
+## Public network deployment status
+
+Being direct about where this actually stands rather than glossing over it:
+
+The full pipeline — compile, deploy, fund, claim, double-claim rejection,
+reconciliation — is **verified end-to-end against a real local Midnight
+devnet with real ZK proofs** (not just the in-memory simulator): see the
+[dashboard screenshot](docs/screenshots/audit-dashboard.png) above, taken
+live off that deployment.
+
+Getting the same deployment onto a public network hit two separate,
+external infrastructure issues on the day of submission:
+
+- **Preprod:** wallet sync against a fresh seed ran ~11 minutes before an
+  out-of-memory crash at the default Node heap; a retry with an 8GB heap
+  ran 20+ minutes with no OOM but also no completion. This matches a
+  previously-documented, team-confirmed Midnight indexer/wallet-sync issue
+  hit in this author's earlier Level 2 submission (a separate project,
+  `midnight-newmoon`), which links the relevant Midnight forum report.
+- **Preview:** the wallet *did* sync successfully (~35 minutes), but the
+  official Preview faucet (`midnight-tmnight-preview.nethermind.dev`)
+  returned "Services are currently unavailable. Please try again later"
+  when checked directly — a live outage on Midnight's own infrastructure,
+  confirmed by loading the faucet page itself, independent of anything in
+  this repo.
+
+Given that, this submission ships with the local-devnet deployment as the
+verified, working MVP, and the audit dashboard deployed live to Vercel
+(https://shadow-payroll.vercel.app) — currently showing "not connected"
+because there is no public-network contract address yet, which is the
+honest state rather than a fake one. The deploy pipeline itself needs no
+further work: once Preprod/Preview funding succeeds (`npm run setup --
+network preview` or `--network preprod`), updating
+`VITE_CONTRACT_ADDRESS` in the Vercel project and this README is a
+five-minute follow-up, not a rebuild.
 
 ## The problem
 
