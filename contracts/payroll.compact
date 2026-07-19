@@ -1,0 +1,124 @@
+// Shadow Payroll: private payroll & revenue splits on Midnight.
+//
+// An employer commits a private allowlist (payee -> allocated amount) as a
+// Merkle root and declares a total budget. Each payee later proves, with a
+// local zero-knowledge proof, that they are a leaf of that tree and that
+// they have not claimed before -- without revealing which leaf they are or
+// how much anyone else was allocated. The contract enforces that the running
+// public total claimed can never exceed the declared budget.
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+// Depth of the payee allowlist Merkle tree (2^8 = 256 payees max for this
+// MVP). Kept small so proving stays fast; raise for a larger org.
+export ledger allowlistRoot: Bytes<32>;
+export ledger totalBudget: Uint<64>;
+export ledger totalClaimed: Uint<64>;
+export ledger usedNullifiers: Set<Bytes<32>>;
+export ledger initialized: Boolean;
+
+constructor() {
+  allowlistRoot = default<Bytes<32>>;
+  totalBudget = 0;
+  totalClaimed = 0;
+  initialized = false;
+}
+
+// -- Witnesses: private, off-chain values supplied locally by the payee. --
+// (The employer's fundPayroll root/budget are ordinary circuit arguments
+// below, since they are meant to become public ledger state immediately --
+// there is no private value to keep hidden on that side.)
+
+witness payeeSecret(): Bytes<32>;
+witness payeeAmount(): Uint<64>;
+witness payeeSiblings(): Vector<8, Bytes<32>>;
+witness payeeDirections(): Vector<8, Boolean>;
+
+// -- Circuits --
+
+export circuit fundPayroll(root: Bytes<32>, budget: Uint<64>): [] {
+  assert(!initialized, "Payroll has already been funded");
+  allowlistRoot = disclose(root);
+  totalBudget = disclose(budget);
+  totalClaimed = 0;
+  initialized = true;
+}
+
+// Rebuilds a Merkle leaf hash for a given secret + amount using domain
+// separation so this hash can never collide with a nullifier hash.
+circuit allowlistLeaf(secret: Bytes<32>, amount: Uint<64>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "shadow-payroll:leaf:v1"),
+    secret,
+    amount as Field as Bytes<32>,
+  ]);
+}
+
+// Combines a node with a sibling at one Merkle level (false = node is the
+// left child, true = node is the right child).
+circuit hashLevel(node: Bytes<32>, sibling: Bytes<32>, nodeIsRight: Boolean): Bytes<32> {
+  const left = nodeIsRight ? sibling : node;
+  const right = nodeIsRight ? node : sibling;
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "shadow-payroll:node:v1"),
+    left,
+    right,
+  ]);
+}
+
+// Recomputes the Merkle root from a leaf, its sibling path, and direction
+// bits. Manually unrolled (fixed depth 8) since circuits must compile to a
+// fixed-size constraint system -- there is no data-dependent looping.
+circuit merkleRoot(
+  leaf: Bytes<32>,
+  siblings: Vector<8, Bytes<32>>,
+  directions: Vector<8, Boolean>,
+): Bytes<32> {
+  const node0 = hashLevel(leaf, siblings[0], directions[0]);
+  const node1 = hashLevel(node0, siblings[1], directions[1]);
+  const node2 = hashLevel(node1, siblings[2], directions[2]);
+  const node3 = hashLevel(node2, siblings[3], directions[3]);
+  const node4 = hashLevel(node3, siblings[4], directions[4]);
+  const node5 = hashLevel(node4, siblings[5], directions[5]);
+  const node6 = hashLevel(node5, siblings[6], directions[6]);
+  const node7 = hashLevel(node6, siblings[7], directions[7]);
+  return node7;
+}
+
+// Nullifier is derived only from the secret (not the amount) so a payee
+// cannot bypass the double-claim check by "re-deriving" a new nullifier.
+circuit payeeNullifier(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "shadow-payroll:nullifier:v1"),
+    secret,
+  ]);
+}
+
+export circuit claim(): [] {
+  assert(initialized, "Payroll has not been funded yet");
+
+  const secret = payeeSecret();
+  const amount = disclose(payeeAmount());
+  const siblings = payeeSiblings();
+  const directions = payeeDirections();
+
+  const leaf = allowlistLeaf(secret, amount);
+  const root = merkleRoot(leaf, siblings, directions);
+  assert(root == allowlistRoot, "Not a member of the payroll allowlist");
+
+  const nullifier = disclose(payeeNullifier(secret));
+  assert(!usedNullifiers.member(nullifier), "Payout already claimed");
+
+  assert(totalClaimed + amount <= totalBudget, "Claim would exceed deposited budget");
+
+  usedNullifiers.insert(nullifier);
+  totalClaimed = (totalClaimed + amount) as Uint<64>;
+}
+
+// Public read helper for the audit dashboard: true once every claimable
+// dollar has been claimed and the payroll is fully reconciled.
+export circuit isReconciled(): Boolean {
+  return initialized && totalClaimed == totalBudget;
+}
