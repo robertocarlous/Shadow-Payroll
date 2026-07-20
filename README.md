@@ -4,9 +4,11 @@
 
 [![CI](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml/badge.svg)](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml)
 
-- **Live audit dashboard:** https://shadow-payroll.vercel.app — showing real
-  on-chain state from the deployment below
-- **Contract address (Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
+- **Live audit dashboard (try it yourself):** https://shadow-payroll.vercel.app
+  — a wallet-connected "Claim a payout" button, not just numbers. See
+  [Try it yourself](#try-it-yourself) below.
+- **Contract address (judge-testable instance, Preview):** `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369`
+- **Contract address (first completed run, Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
 - **Product X profile:** _TODO: add link_
 - **Demo video:** _TODO: add link_
 
@@ -47,6 +49,41 @@ The local-devnet deployment (compile → deploy → fund → claim →
 double-claim rejection → reconciliation, all with real ZK proofs) remains
 independently verified too — see
 [docs/screenshots/audit-dashboard.png](docs/screenshots/audit-dashboard.png).
+
+**A second, judge-testable instance** is now live too (contract address
+above) — funded with 4 small, deliberately-unclaimed allocations so a
+visitor can actually click "Claim" and watch the dashboard change, rather
+than just look at an already-finished number. See
+[Try it yourself](#try-it-yourself).
+
+## Try it yourself
+
+The dashboard has a real wallet-connected claim flow, not just read-only
+numbers. Lace doesn't yet support in-wallet proof generation (confirmed on
+the [Midnight forum](https://forum.midnight.network/t/lace-wallet-doesnt-implement-getprovingprovider-expected-behavior-or-version-gap/1213)),
+so proving happens against a local proof-server — same tradeoff this
+author's earlier `midnight-newmoon` project already worked through.
+
+**Prerequisites:**
+1. [Lace wallet](https://www.lace.io/) installed, connected to the **Preview** network, with a small amount of Preview tNight/DUST (get some from the [Preview faucet](https://midnight-tmnight-preview.nethermind.dev)).
+2. Docker running the proof-server locally: `git clone` this repo, `docker compose up -d proof-server`.
+
+**Steps:**
+1. Open https://shadow-payroll.vercel.app and click **Connect Lace**.
+2. Grab one of the four test credential files from
+   [docs/try-it-yourself/credentials/](docs/try-it-yourself/credentials/)
+   (`judge1.json` through `judge4.json` — each claims a different small
+   amount, 10/20/30/40, and can only be claimed once).
+3. Paste its contents (or upload the file) into the **Claim a payout** box
+   and click **Claim payout**.
+4. Watch "Total claimed" and "Claims made" update within a few seconds, and
+   "✅ Fully reconciled" appear once all four have been claimed.
+
+These credentials are **deliberately public** (committed to this repo) —
+this is a disposable testnet demo payroll, not a real one. A real
+deployment's credential files are bearer secrets and must never be
+committed (see [Usage](#usage) below); `.payroll/` (the directory the real
+allowlist-builder writes to) is gitignored for exactly that reason.
 
 ## The problem
 
@@ -225,9 +262,12 @@ cp .env.example .env   # set VITE_NETWORK and VITE_CONTRACT_ADDRESS
 npm run build && npm run preview
 ```
 
-The dashboard is read-only and polls the public indexer directly — no
-wallet connection needed to view deposited / claimed / reconciled. Deployed
-to Vercel from this repo; see the live link at the top of this README.
+The public audit stats (deposited / claimed / reconciled) are read-only and
+poll the indexer directly — no wallet needed to view them. The **Claim a
+payout** panel below them is the interactive part: connect Lace, paste a
+credential, submit a real transaction (see
+[Try it yourself](#try-it-yourself)). Deployed to Vercel from this repo;
+see the live link at the top of this README.
 
 ![Audit dashboard showing a fully reconciled payroll](docs/screenshots/audit-dashboard.png)
 
