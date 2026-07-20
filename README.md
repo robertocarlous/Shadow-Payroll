@@ -4,53 +4,49 @@
 
 [![CI](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml/badge.svg)](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml)
 
-- **Audit dashboard:** https://shadow-payroll.vercel.app (live, currently showing "not connected" — see [Public network deployment status](#public-network-deployment-status) below)
-- **Contract address (Preview/Preprod):** _TODO: add once public-network deployment completes_
+- **Live audit dashboard:** https://shadow-payroll.vercel.app — showing real
+  on-chain state from the deployment below
+- **Contract address (Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
 - **Product X profile:** _TODO: add link_
 - **Demo video:** _TODO: add link_
 
 ## Public network deployment status
 
-Being direct about where this actually stands rather than glossing over it:
+Live on Midnight **Preview**: contract deployed, payroll funded (budget
+350), two payees claimed their private allocations, and the running total
+reconciled — all with real transactions and real ZK proofs, visible on the
+[live dashboard](https://shadow-payroll.vercel.app):
 
-The full pipeline — compile, deploy, fund, claim, double-claim rejection,
-reconciliation — is **verified end-to-end against a real local Midnight
-devnet with real ZK proofs** (not just the in-memory simulator): see the
-[dashboard screenshot](docs/screenshots/audit-dashboard.png) above, taken
-live off that deployment.
+![Live dashboard showing a fully reconciled payroll on Preview](docs/screenshots/audit-dashboard-preview-live.png)
 
-Getting the same deployment onto a public network hit two separate,
-external infrastructure issues on the day of submission:
+Getting there took two rounds of real infrastructure debugging worth being
+transparent about:
 
-- **Preprod:** wallet sync against a fresh seed ran ~11 minutes before an
-  out-of-memory crash at the default Node heap. Retried the next day with
-  an 8GB heap: one attempt ran 20+ minutes with no OOM but also no
-  completion; a second attempt OOM'd again after ~10 minutes. Consistent
-  failure around the same ~10-minute mark regardless of heap size across
-  three independent attempts on two different days points to unbounded
-  memory growth in the wallet SDK's sync path against Preprod specifically,
-  not a one-off fluke. This matches a previously-documented, team-confirmed
+- **Preprod** never worked: wallet sync against a fresh seed OOM'd 3
+  separate times across 2 days regardless of Node heap size (default, 8GB
+  twice) — consistent failure around the ~10-minute mark points to
+  unbounded memory growth in the wallet SDK's sync path against Preprod
+  specifically. This matches a previously-documented, team-confirmed
   Midnight indexer/wallet-sync issue hit in this author's earlier Level 2
-  submission (a separate project, `midnight-newmoon`), which links the
-  relevant Midnight forum report.
-- **Preview:** the wallet *did* sync successfully (~35 minutes), but the
-  official Preview faucet (`midnight-tmnight-preview.nethermind.dev`)
-  returned "Services are currently unavailable. Please try again later" in
-  the browser, and its own `/api/health` endpoint reported
-  `{"status":"NOT_SERVING","reason":"SYNC_STUCK_RECOVERY","needsRestart":true}`
-  — Midnight's own infrastructure explicitly flagging itself as needing a
-  restart, re-confirmed the next day. Not something a client-side retry
-  can work around.
+  submission (a separate project, `midnight-newmoon`). **Preprod was
+  abandoned in favor of Preview**, which the mission brief also treats as
+  an acceptable documented substitution when Preprod itself is the blocker.
+- **Preview's faucet** was down for about a day
+  (`{"status":"NOT_SERVING","reason":"SYNC_STUCK_RECOVERY","needsRestart":true}`
+  from its own health endpoint) — resolved on Midnight's end, then funded
+  successfully via the public faucet UI.
+- **DUST registration** then failed identically 4 times in a row with a
+  clean websocket disconnect (`1000: Normal Closure`) from the Preview RPC
+  node, right as `submitAndWatchExtrinsic` started watching for inclusion —
+  reproducible enough to be a real client/RPC interaction issue, not
+  random flakiness. Fixed by adding a small in-process retry loop around
+  that specific submission in `src/deploy.ts` (see the code comment there);
+  it succeeded on the 2nd internal attempt once added.
 
-Given that, this submission ships with the local-devnet deployment as the
-verified, working MVP, and the audit dashboard deployed live to Vercel
-(https://shadow-payroll.vercel.app) — currently showing "not connected"
-because there is no public-network contract address yet, which is the
-honest state rather than a fake one. The deploy pipeline itself needs no
-further work: once Preprod/Preview funding succeeds (`npm run setup --
-network preview` or `--network preprod`), updating
-`VITE_CONTRACT_ADDRESS` in the Vercel project and this README is a
-five-minute follow-up, not a rebuild.
+The local-devnet deployment (compile → deploy → fund → claim →
+double-claim rejection → reconciliation, all with real ZK proofs) remains
+independently verified too — see
+[docs/screenshots/audit-dashboard.png](docs/screenshots/audit-dashboard.png).
 
 ## The problem
 
