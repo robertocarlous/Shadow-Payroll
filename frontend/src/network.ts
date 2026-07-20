@@ -35,3 +35,10 @@ const envNetwork = import.meta.env.VITE_NETWORK;
 export const ACTIVE_NETWORK: NetworkId = isNetworkId(envNetwork) ? envNetwork : 'preprod';
 export const ACTIVE_NETWORK_CONFIG = NETWORK_CONFIGS[ACTIVE_NETWORK];
 export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS ?? '';
+
+// As of writing, Lace does not implement wallet-delegated proving
+// (getProvingProvider), so the claim flow (see src/midnight/contractClient.ts)
+// runs proving itself against a proof-server on the user's own machine, same
+// as the root CLI's docker-compose service -- overridable in case a public
+// one becomes available.
+export const PROOF_SERVER_URL: string = import.meta.env.VITE_PROOF_SERVER_URL ?? 'http://127.0.0.1:6300';
