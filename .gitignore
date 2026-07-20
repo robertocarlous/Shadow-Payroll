@@ -18,6 +18,13 @@ credentials/
 *.credential.json
 .payroll/
 
+# Exception: the "Try it yourself" judge-testable demo payroll is
+# deliberately public (a disposable testnet payroll, not a real one) --
+# see README "Try it yourself".
+!docs/try-it-yourself/
+!docs/try-it-yourself/credentials/
+!docs/try-it-yourself/credentials/*.json
+
 # Midnight network state: per-network wallet SEED and deployment address.
 # The seed is sensitive; treat this file like a private key.
 .midnight-state.json
