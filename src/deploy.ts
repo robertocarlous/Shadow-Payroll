@@ -233,7 +233,35 @@ async function main() {
       (payload) => walletCtx.unshieldedKeystore.signData(payload),
     );
     const finalized = await walletCtx.wallet.finalizeRecipe(recipe);
-    await walletCtx.wallet.submitTransaction(finalized);
+
+    // Observed on Preview: submitTransaction's underlying
+    // submitAndWatchExtrinsic subscription can get a clean ("Normal
+    // Closure") websocket disconnect from the RPC gateway right as it
+    // starts watching, before any inclusion confirmation arrives -- even on
+    // a freshly-synced connection, reproducibly. Resubmitting the same
+    // already-finalized transaction is safe (it's a single signed extrinsic;
+    // if a prior attempt actually landed despite the client-side error, the
+    // chain will reject the duplicate distinctly rather than repeat this
+    // disconnect).
+    const DUST_REG_MAX_ATTEMPTS = 6;
+    const DUST_REG_RETRY_DELAY_MS = 4000;
+    let registered = false;
+    for (let attempt = 1; attempt <= DUST_REG_MAX_ATTEMPTS; attempt++) {
+      try {
+        await walletCtx.wallet.submitTransaction(finalized);
+        registered = true;
+        break;
+      } catch (err: any) {
+        const msg = err?.message || err?.cause?.message || String(err);
+        console.log(`  ⏳ DUST registration attempt ${attempt}/${DUST_REG_MAX_ATTEMPTS} failed (${msg.slice(0, 120)}); retrying...`);
+        if (attempt < DUST_REG_MAX_ATTEMPTS) {
+          await new Promise((r) => setTimeout(r, DUST_REG_RETRY_DELAY_MS));
+        }
+      }
+    }
+    if (!registered) {
+      throw new Error(`DUST registration failed after ${DUST_REG_MAX_ATTEMPTS} attempts`);
+    }
   }
 
   if (dustState.dust.balance(new Date()) === 0n) {
