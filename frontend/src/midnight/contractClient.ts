@@ -17,25 +17,19 @@ import { describeError } from './errors';
 
 export type DustRetryCallback = (attempt: number, maxAttempts: number) => void;
 
-// Two distinct transient failure modes observed against Preview, both worth
-// retrying the whole claim() call for (safe to redo: nothing has landed
-// on-chain yet, so a retry after a client-side failure either succeeds or
-// -- if the first attempt actually landed despite the error -- fails with a
-// distinct, legitimate "already claimed" error, not a silent double-spend):
-//
-// 1. A brand-new (or recently used) wallet's reported DUST balance is a
-//    time-projection of what its registered NIGHT will eventually generate;
-//    the tx-builder only spends what the *next block's timestamp* accounts
-//    for, which can lag wall-clock by roughly a block right after funding or
-//    registration. Shows up as "Insufficient Funds: could not balance dust".
-// 2. The Preview RPC node has been observed to cleanly close the websocket
-//    (`1000: Normal Closure`) right as `submitTransaction` starts watching
-//    for inclusion, reproducibly -- the same issue fixed with a retry loop
-//    in the root CLI's src/deploy.ts (see the comment there for more detail).
-function isTransientSubmissionError(description: string): boolean {
-  return /insufficient funds|not enough dust|could not balance dust|transaction submission (error|failed)|normal closure/i.test(
-    description,
-  );
+// A brand-new (or recently used) wallet's reported DUST balance is a
+// time-projection of what its registered NIGHT will eventually generate;
+// the tx-builder only spends what the *next block's timestamp* accounts
+// for, which can lag wall-clock by roughly a block right after funding or
+// registration. Shows up as "Insufficient Funds: could not balance dust"
+// even when DUST is genuinely accruing. Retrying the whole claim() call is
+// necessary here (unlike a plain submission disconnect) because the
+// balancing math itself needs to be redone once more DUST has accrued --
+// that does mean a fresh Lace signing prompt per attempt, but this failure
+// mode is expected to be rare and short-lived, unlike the submission-level
+// disconnect handled without re-signing in laceProviders.ts's submitTx.
+function isDustShortage(description: string): boolean {
+  return /insufficient funds|not enough dust|could not balance dust/i.test(description);
 }
 
 async function withRetry<T>(fn: () => Promise<T>, onRetry?: DustRetryCallback): Promise<T> {
@@ -46,7 +40,7 @@ async function withRetry<T>(fn: () => Promise<T>, onRetry?: DustRetryCallback): 
       return await fn();
     } catch (err) {
       const description = describeError(err);
-      if (!isTransientSubmissionError(description) || attempt === MAX_RETRIES) throw err;
+      if (!isDustShortage(description) || attempt === MAX_RETRIES) throw err;
       onRetry?.(attempt, MAX_RETRIES);
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
     }
