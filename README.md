@@ -23,17 +23,24 @@ Getting the same deployment onto a public network hit two separate,
 external infrastructure issues on the day of submission:
 
 - **Preprod:** wallet sync against a fresh seed ran ~11 minutes before an
-  out-of-memory crash at the default Node heap; a retry with an 8GB heap
-  ran 20+ minutes with no OOM but also no completion. This matches a
-  previously-documented, team-confirmed Midnight indexer/wallet-sync issue
-  hit in this author's earlier Level 2 submission (a separate project,
-  `midnight-newmoon`), which links the relevant Midnight forum report.
+  out-of-memory crash at the default Node heap. Retried the next day with
+  an 8GB heap: one attempt ran 20+ minutes with no OOM but also no
+  completion; a second attempt OOM'd again after ~10 minutes. Consistent
+  failure around the same ~10-minute mark regardless of heap size across
+  three independent attempts on two different days points to unbounded
+  memory growth in the wallet SDK's sync path against Preprod specifically,
+  not a one-off fluke. This matches a previously-documented, team-confirmed
+  Midnight indexer/wallet-sync issue hit in this author's earlier Level 2
+  submission (a separate project, `midnight-newmoon`), which links the
+  relevant Midnight forum report.
 - **Preview:** the wallet *did* sync successfully (~35 minutes), but the
   official Preview faucet (`midnight-tmnight-preview.nethermind.dev`)
-  returned "Services are currently unavailable. Please try again later"
-  when checked directly — a live outage on Midnight's own infrastructure,
-  confirmed by loading the faucet page itself, independent of anything in
-  this repo.
+  returned "Services are currently unavailable. Please try again later" in
+  the browser, and its own `/api/health` endpoint reported
+  `{"status":"NOT_SERVING","reason":"SYNC_STUCK_RECOVERY","needsRestart":true}`
+  — Midnight's own infrastructure explicitly flagging itself as needing a
+  restart, re-confirmed the next day. Not something a client-side retry
+  can work around.
 
 Given that, this submission ships with the local-devnet deployment as the
 verified, working MVP, and the audit dashboard deployed live to Vercel
