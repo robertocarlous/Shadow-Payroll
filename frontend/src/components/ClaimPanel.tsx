@@ -76,7 +76,7 @@ export function ClaimPanel() {
             <button className="btn btn--primary" onClick={handleClaim} disabled={submitting || !credentialText.trim()}>
               {submitting
                 ? dustRetry
-                  ? `Waiting for DUST… (${dustRetry.attempt}/${dustRetry.max})`
+                  ? `Retrying… (${dustRetry.attempt}/${dustRetry.max})`
                   : 'Proving + submitting…'
                 : 'Claim payout'}
             </button>
