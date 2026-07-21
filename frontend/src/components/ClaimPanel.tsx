@@ -10,6 +10,7 @@ export function ClaimPanel() {
   const [credentialText, setCredentialText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [dustRetry, setDustRetry] = useState<{ attempt: number; max: number } | null>(null);
+  const [submitRetry, setSubmitRetry] = useState<{ attempt: number; max: number } | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
 
@@ -26,10 +27,16 @@ export function ClaimPanel() {
     setClaimError(null);
     setTxId(null);
     setDustRetry(null);
+    setSubmitRetry(null);
     try {
       const credential = parseCredential(credentialText);
-      const { txId: id } = await submitClaim(api, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (attempt, max) =>
-        setDustRetry({ attempt, max }),
+      const { txId: id } = await submitClaim(
+        api,
+        ACTIVE_NETWORK,
+        CONTRACT_ADDRESS,
+        credential,
+        (attempt, max) => setDustRetry({ attempt, max }),
+        (attempt, max) => setSubmitRetry({ attempt, max }),
       );
       setTxId(id);
       setCredentialText('');
@@ -37,6 +44,7 @@ export function ClaimPanel() {
       setClaimError(describeError(err));
     } finally {
       setDustRetry(null);
+      setSubmitRetry(null);
       setSubmitting(false);
     }
   }, [api, credentialText]);
@@ -77,7 +85,9 @@ export function ClaimPanel() {
               {submitting
                 ? dustRetry
                   ? `Waiting for DUST… (${dustRetry.attempt}/${dustRetry.max})`
-                  : 'Proving + submitting…'
+                  : submitRetry
+                    ? `Retrying submission (Preview network hiccup)… (${submitRetry.attempt}/${submitRetry.max})`
+                    : 'Proving + submitting…'
                 : 'Claim payout'}
             </button>
           </div>

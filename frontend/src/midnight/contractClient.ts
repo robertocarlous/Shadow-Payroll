@@ -16,6 +16,7 @@ import { makeWitnesses, type PayeeCredential } from './witnesses';
 import { describeError } from './errors';
 
 export type DustRetryCallback = (attempt: number, maxAttempts: number) => void;
+export type SubmitRetryCallback = (attempt: number, maxAttempts: number) => void;
 
 // A brand-new (or recently used) wallet's reported DUST balance is a
 // time-projection of what its registered NIGHT will eventually generate;
@@ -56,6 +57,7 @@ export async function submitClaim(
   contractAddress: string,
   credential: PayeeCredential,
   onDustRetry?: DustRetryCallback,
+  onSubmitRetry?: SubmitRetryCallback,
 ): Promise<{ txId: string }> {
   setNetworkId(networkId);
 
@@ -77,7 +79,7 @@ export async function submitClaim(
     CompiledContract.withCompiledFileAssets(ZK_BASE_URL),
   );
 
-  const walletAndMidnightProvider = await makeWalletAndMidnightProvider(api, networkId);
+  const walletAndMidnightProvider = await makeWalletAndMidnightProvider(api, networkId, onSubmitRetry);
   const proofProvider = await makeProofProvider(api, zkConfigProvider, PROOF_SERVER_URL);
 
   const providers = {

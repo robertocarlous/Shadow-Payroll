@@ -37,9 +37,12 @@ async function resolveShieldedKeys(api: ConnectedAPI, networkId: string) {
   return { coinPublicKey, encryptionPublicKey };
 }
 
+export type SubmitRetryCallback = (attempt: number, maxAttempts: number) => void;
+
 export async function makeWalletAndMidnightProvider(
   api: ConnectedAPI,
   networkId: string,
+  onSubmitRetry?: SubmitRetryCallback,
 ): Promise<WalletProvider & MidnightProvider> {
   const { coinPublicKey, encryptionPublicKey } = await resolveShieldedKeys(api, networkId);
 
@@ -67,7 +70,11 @@ export async function makeWalletAndMidnightProvider(
       // actually landed despite the client-side error, the chain rejects
       // the resubmission with a distinct "already submitted"-style error
       // rather than repeating this disconnect, so this can't double-spend.
-      const MAX_ATTEMPTS = 6;
+      // Bumped from 6 attempts/4s (~24s) after that budget proved too
+      // tight during a real flaky stretch on Preview -- deploy.ts's DUST
+      // registration hit this disconnect 4x in a row on its own, so a
+      // margin of only 1-2 spare retries here isn't enough headroom.
+      const MAX_ATTEMPTS = 15;
       const RETRY_DELAY_MS = 4000;
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         try {
@@ -80,6 +87,7 @@ export async function makeWalletAndMidnightProvider(
           const description = describeError(err);
           const isTransient = /transaction submission (error|failed)|normal closure/i.test(description);
           if (!isTransient || attempt === MAX_ATTEMPTS) throw err;
+          onSubmitRetry?.(attempt, MAX_ATTEMPTS);
           await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         }
       }
