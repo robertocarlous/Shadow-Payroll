@@ -9,8 +9,8 @@
   [Try it yourself](#try-it-yourself) below.
 - **Contract address (judge-testable instance, Preview):** `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369`
 - **Contract address (first completed run, Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
-- **Product X profile:** _TODO: add link_
-- **Demo video:** _TODO: add link_
+- **Product X profile:** https://x.com/shadowpayr
+- **Demo video:** https://www.loom.com/share/61da9480bc3c4760bac22f886c825c4a
 
 ## Public network deployment status
 

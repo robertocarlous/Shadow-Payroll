@@ -316,12 +316,32 @@ async function main() {
     } catch (err: any) {
       const errMsg = err?.message || err?.toString() || '';
       const errCause = err?.cause?.message || err?.cause?.toString() || '';
-      const fullError = `${errMsg} ${errCause}`;
+
+      // The real RPC rejection reason (e.g. "Custom error: 171") is often
+      // nested two or more `.cause` levels deep -- errMsg/errCause alone
+      // only see the generic "Transaction submission error/failed" wrapper.
+      let fullError = '';
+      let node: unknown = err;
+      const seen = new Set<unknown>();
+      while (node && typeof node === 'object' && !seen.has(node)) {
+        seen.add(node);
+        const m = (node as { message?: unknown }).message;
+        if (typeof m === 'string') fullError += ` ${m}`;
+        node = (node as { cause?: unknown }).cause;
+      }
 
       const isDustShortage =
         fullError.includes('Not enough Dust') ||
         fullError.includes('Insufficient Funds') ||
-        fullError.includes('could not balance dust');
+        fullError.includes('could not balance dust') ||
+        // Custom error 171 = OutOfDustValidityWindow: a freshly-registered
+        // wallet's DUST balance is a time-projection that can lag the
+        // block the tx-builder targets by a block or two right after
+        // registration -- a team-confirmed Midnight timing race, not a
+        // permanent rejection. Safe to retry like any other DUST-timing
+        // shortfall (see the "Generating DUST..." sleep above).
+        fullError.includes('Custom error: 171') ||
+        fullError.includes('OutOfDustValidityWindow');
 
       if (!(isDustShortage && attempt === 1)) {
         console.error(`\n  Attempt ${attempt} error: ${errMsg}`);
