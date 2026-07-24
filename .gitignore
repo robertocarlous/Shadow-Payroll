@@ -7,12 +7,6 @@ build/
 *.log
 .DS_Store
 
-# Compiled contract artifacts (TypeScript bindings + zkir + proving/verifier
-# keys). Regenerated with `npm run compile` (CI does this fresh every run);
-# not committed because the proving keys for this contract are ~19MB and
-# would bloat repo history on every recompile.
-contracts/managed/
-
 # Private allowlist credentials -- never commit a payee's secret/amount/path.
 credentials/
 *.credential.json
