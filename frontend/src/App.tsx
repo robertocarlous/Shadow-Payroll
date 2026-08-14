@@ -2,77 +2,61 @@ import { usePayrollState } from './usePayrollState';
 import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from './network';
 import { WalletProvider } from './context/WalletContext';
 import { WalletBar } from './components/WalletBar';
+import { Hero } from './components/Hero';
+import { PayrollStatus } from './components/PayrollStatus';
+import { CommunityStats } from './components/CommunityStats';
+import { HowItWorks } from './components/HowItWorks';
+import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { ClaimPanel } from './components/ClaimPanel';
+import { Faq } from './components/Faq';
+import { FeedbackPanel } from './components/FeedbackPanel';
 import './App.css';
-
-function formatAmount(n: bigint): string {
-  return n.toLocaleString('en-US');
-}
-
-function StatTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="stat-tile">
-      <span className="stat-label">{label}</span>
-      <span className="stat-value">{value}</span>
-    </div>
-  );
-}
 
 export default function App() {
   const state = usePayrollState();
+  const claimsMade = state.status === 'ready' ? Number(state.state.claimsMade) : 0;
 
   return (
     <WalletProvider>
       <div className="page">
         <header className="header">
-          <h1>Shadow Payroll</h1>
-          <p className="subtitle">Public audit dashboard — private amounts, public solvency</p>
+          <div className="header__brand">
+            <span className="header__logo" aria-hidden="true">
+              🌕
+            </span>
+            <span className="header__name">Shadow Payroll</span>
+          </div>
+          <span className="header__badge">{ACTIVE_NETWORK}</span>
         </header>
 
-        <WalletBar />
+        <main className="layout">
+          <Hero />
 
-        <main className="card">
-          {state.status === 'loading' && <p className="muted">Loading on-chain state…</p>}
+          <WalletBar />
 
-          {state.status === 'error' && (
-            <div className="error-box">
-              <span className="status-badge critical">⚠ Not connected</span>
-              <p>{state.message}</p>
-            </div>
-          )}
+          <PayrollStatus state={state} />
+          <CommunityStats claimsMade={claimsMade} />
 
-          {state.status === 'ready' && (
-            <>
-              <div className="stat-row">
-                <StatTile label="Total deposited" value={formatAmount(state.state.totalBudget)} />
-                <StatTile label="Total claimed" value={formatAmount(state.state.totalClaimed)} />
-                <StatTile label="Claims made" value={formatAmount(state.state.claimsMade)} />
-              </div>
+          <HowItWorks />
 
-              <div className="reconciled-row">
-                {state.state.reconciled ? (
-                  <span className="status-badge good">✅ Fully reconciled</span>
-                ) : state.state.initialized ? (
-                  <span className="status-badge pending">⏳ Not yet fully claimed</span>
-                ) : (
-                  <span className="status-badge pending">⏳ Awaiting employer funding</span>
-                )}
-                <span className="muted last-updated">
-                  Last updated {state.lastUpdated.toLocaleTimeString()}
-                </span>
-              </div>
-            </>
-          )}
+          <OnboardingChecklist />
+
+          <ClaimPanel />
+
+          <Faq />
+
+          <FeedbackPanel />
         </main>
-
-        <ClaimPanel />
 
         <footer className="footer">
           <p>
             Network: <strong>{ACTIVE_NETWORK}</strong>
             {CONTRACT_ADDRESS && (
               <>
-                {' · '}Contract: <code>{CONTRACT_ADDRESS.slice(0, 10)}…{CONTRACT_ADDRESS.slice(-6)}</code>
+                {' · '}Contract:{' '}
+                <code>
+                  {CONTRACT_ADDRESS.slice(0, 10)}…{CONTRACT_ADDRESS.slice(-6)}
+                </code>
               </>
             )}
           </p>

@@ -25,6 +25,13 @@ credentials/
 !docs/try-it-yourself/credentials/
 !docs/try-it-yourself/credentials/*.json
 
+# Level 5 cohort: the 50 demo payout credentials are deliberately public
+# (same reasoning as docs/try-it-yourself -- disposable Preview test data,
+# documented in docs/level5/README.md).
+!docs/level5/
+!docs/level5/credentials/
+!docs/level5/credentials/*.json
+
 # Midnight network state: per-network wallet SEED and deployment address.
 # The seed is sensitive; treat this file like a private key.
 .midnight-state.json

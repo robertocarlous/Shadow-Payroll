@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useWallet } from '../context/WalletContext';
 import { submitClaim } from '../midnight/contractClient';
 import { parseCredential } from '../midnight/witnesses';
@@ -12,6 +12,8 @@ export function ClaimPanel() {
   const [dustRetry, setDustRetry] = useState<{ attempt: number; max: number } | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const onFileChosen = useCallback((file: File | undefined) => {
     if (!file) return;
@@ -42,60 +44,97 @@ export function ClaimPanel() {
   }, [api, credentialText]);
 
   return (
-    <div className="card claim-panel">
-      <h3>Claim a payout</h3>
-      <p className="muted">
-        Paste (or upload) a payee credential file to submit a real claim -- generates a local zero-knowledge proof
-        and submits it through your connected wallet. Nobody, including this app, ever sees your allocated amount
-        except you.
-      </p>
+    <section className="card claim-panel" id="claim">
+      <div className="section-heading">
+        <h2>Claim your payout</h2>
+        <span className="muted">Private in. Proof out. Amount never shown.</span>
+      </div>
+
+      <ol className="claim-steps">
+        <li>Make sure your wallet above says <strong>Connected</strong>.</li>
+        <li>Get your credential file (issued to you by the employer for this cohort).</li>
+        <li>Drop it below and press <strong>Claim payout</strong>.</li>
+      </ol>
 
       {walletStatus !== 'connected' ? (
-        <p className="claim-panel__hint">Connect a wallet above to claim.</p>
+        <p className="claim-panel__hint">
+          Connect a wallet in the bar above to claim. Stuck? Work through the{' '}
+          <a href="#onboarding">checklist</a>.
+        </p>
       ) : (
         <>
+          <div
+            className={`claim-dropzone ${dragging ? 'is-dragging' : ''}`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              onFileChosen(e.dataTransfer.files?.[0]);
+            }}
+            onClick={() => fileInput.current?.click()}
+          >
+            <span className="claim-dropzone__icon" aria-hidden="true">
+              ⬆
+            </span>
+            <span className="claim-dropzone__main">Drop your credential file here</span>
+            <span className="claim-dropzone__sub">
+              or click to browse · or paste JSON into the box below
+            </span>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="application/json,.json"
+              onChange={(e) => onFileChosen(e.target.files?.[0])}
+              disabled={submitting}
+              hidden
+            />
+          </div>
+
           <textarea
             className="claim-panel__textarea"
-            placeholder='Paste credential JSON here, e.g. { "payeeId": "judge1", "secret": "...", ... }'
+            placeholder='…or paste credential JSON here, e.g. { "payeeId": "user01", "secret": "…", "amount": "…", … }'
             value={credentialText}
             onChange={(e) => setCredentialText(e.target.value)}
             disabled={submitting}
-            rows={6}
+            rows={5}
           />
+
           <div className="claim-panel__row">
-            <label className="btn btn--ghost btn--small claim-panel__upload">
-              Upload file
-              <input
-                type="file"
-                accept="application/json"
-                onChange={(e) => onFileChosen(e.target.files?.[0])}
-                disabled={submitting}
-                hidden
-              />
-            </label>
-            <button className="btn btn--primary" onClick={handleClaim} disabled={submitting || !credentialText.trim()}>
+            <button
+              className="btn btn--primary btn--lg"
+              onClick={handleClaim}
+              disabled={submitting || !credentialText.trim()}
+            >
               {submitting
                 ? dustRetry
                   ? `Waiting for DUST… (${dustRetry.attempt}/${dustRetry.max})`
                   : 'Proving + submitting…'
                 : 'Claim payout'}
             </button>
+            <span className="muted">
+              Generates a zero-knowledge proof locally, then submits through your wallet.
+            </span>
           </div>
         </>
       )}
 
       {claimError && (
         <div className="banner banner--error">
-          <strong>Couldn't claim</strong>
+          <strong>Couldn&apos;t claim</strong>
           <p>{claimError}</p>
         </div>
       )}
       {txId && (
         <div className="banner banner--success">
-          <strong>✅ Claimed</strong>
+          <strong>Claimed</strong>
+          <span>Your payout was claimed on-chain. Watch the progress bar move.</span>
           <code className="claim-panel__txid">{txId}</code>
         </div>
       )}
-    </div>
+    </section>
   );
 }

@@ -9,8 +9,25 @@
   [Try it yourself](#try-it-yourself) below.
 - **Contract address (judge-testable instance, Preview):** `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369`
 - **Contract address (first completed run, Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
+- **Level 5 submission map:** [docs/LEVEL5.md](docs/LEVEL5.md)
 - **Product X profile:** _TODO: add link_
-- **Demo video:** _TODO: add link_
+- **Demo video:** _TODO: add link_ (see the recording checklist in
+  [docs/LEVEL5.md](docs/LEVEL5.md))
+
+## Level 5 — Full Moon
+
+This cycle turned the MVP into something real users can meet: a **50-payee
+Preview cohort** (one payout credential per payee, committing a private leaf
+to a single allowlist root — see [docs/level5/](docs/level5/)), a **guided
+dashboard** (checklist, how-it-works, FAQ, community stats, feedback panel),
+and a **documented feedback loop**
+([docs/FEEDBACK-LOOP.md](docs/FEEDBACK-LOOP.md)) with a public changelog
+([docs/level5/FEEDBACK.md](docs/level5/FEEDBACK.md)).
+
+The cohort's payout credentials are committed under `docs/level5/`. The
+[judge-testable](docs/level5/root.json) allowlist root is what gets funded
+on-chain to bring the cohort live; see
+[docs/level5/README.md](docs/level5/README.md) for the two-command deploy.
 
 ## Public network deployment status
 
