@@ -5,6 +5,7 @@ export function Hero() {
     <section className="hero">
       <div className="hero__moon" aria-hidden="true">
         <span className="hero__moon-dot" />
+        <span className="hero__orbit" />
       </div>
       <div className="hero__body">
         <p className="hero__eyebrow">Level 5 · Full Moon · Preview</p>
