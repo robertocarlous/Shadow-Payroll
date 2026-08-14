@@ -958,52 +958,6 @@ body {
   color: var(--text-secondary);
 }
 
-/* ---------- Feedback ---------- */
-
-.feedback-rating {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.feedback-rating__btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  background: var(--surface-glass-2);
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.feedback-rating__btn:hover {
-  transform: translateY(-2px);
-  border-color: var(--hairline-strong);
-}
-
-.feedback-rating__btn.is-selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 0 16px rgba(242, 201, 76, 0.25);
-}
-
-.feedback-rating__emoji {
-  font-size: 22px;
-}
-
-.feedback-rating__name {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.feedback-comment {
-  font-family: inherit;
-  font-size: 14px;
-}
-
 /* ---------- Buttons ---------- */
 
 .btn {

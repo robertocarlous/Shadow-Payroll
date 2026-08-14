@@ -10,7 +10,6 @@ import { HowItWorks } from './components/HowItWorks';
 import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { ClaimPanel } from './components/ClaimPanel';
 import { Faq } from './components/Faq';
-import { FeedbackPanel } from './components/FeedbackPanel';
 import './App.css';
 
 const STAR_COUNT = 80;
@@ -91,8 +90,6 @@ export default function App() {
           <ClaimPanel />
 
           <Faq />
-
-          <FeedbackPanel />
         </main>
 
         <footer className="footer">
