@@ -6,7 +6,7 @@ import { describeError } from '../midnight/errors';
 import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from '../network';
 
 export function ClaimPanel() {
-  const { status: walletStatus, api } = useWallet();
+  const { status: walletStatus, api, reconnect } = useWallet();
   const [credentialText, setCredentialText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [dustRetry, setDustRetry] = useState<{ attempt: number; max: number } | null>(null);
@@ -22,6 +22,8 @@ export function ClaimPanel() {
     reader.readAsText(file);
   }, []);
 
+  const isLockedError = useCallback((description: string) => /wallet is locked/i.test(description), []);
+
   const handleClaim = useCallback(async () => {
     if (!api || !credentialText.trim()) return;
     setSubmitting(true);
@@ -36,12 +38,34 @@ export function ClaimPanel() {
       setTxId(id);
       setCredentialText('');
     } catch (err) {
-      setClaimError(describeError(err));
+      const description = describeError(err);
+      if (isLockedError(description)) {
+        // Lace reports a stale "Wallet is locked" on sessions that predate a
+        // lock/reopen cycle even when the wallet is open. Refresh the dapp
+        // connection and retry once rather than dead-ending here.
+        setClaimError(
+          'Your wallet connection went stale (Lace reports it locked). Refreshing the connection and retrying…',
+        );
+        try {
+          const freshApi = await reconnect();
+          const credential = parseCredential(credentialText);
+          const fresh = await submitClaim(freshApi, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (attempt, max) =>
+            setDustRetry({ attempt, max }),
+          );
+          setTxId(fresh.txId);
+          setCredentialText('');
+          setClaimError(null);
+        } catch (retryErr) {
+          setClaimError(describeError(retryErr));
+        }
+      } else {
+        setClaimError(description);
+      }
     } finally {
       setDustRetry(null);
       setSubmitting(false);
     }
-  }, [api, credentialText]);
+  }, [api, credentialText, isLockedError, reconnect]);
 
   return (
     <section className="card claim-panel" id="claim">

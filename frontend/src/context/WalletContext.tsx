@@ -12,6 +12,7 @@ interface WalletContextValue {
   unshieldedAddress: string | null;
   availableWallets: InitialAPI[];
   connect: () => Promise<void>;
+  reconnect: () => Promise<ConnectedAPI>;
   disconnect: () => void;
   refreshWallets: () => void;
 }
@@ -27,25 +28,47 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const refreshWallets = useCallback(() => setAvailableWallets(listWallets()), []);
 
+  const establish = useCallback(async () => {
+    const wallets = listWallets();
+    setAvailableWallets(wallets);
+    if (wallets.length === 0) {
+      throw new Error('No Midnight wallet found. Install Lace and refresh the page.');
+    }
+    const connectedApi = await connectWallet(wallets[0], ACTIVE_NETWORK);
+    const { unshieldedAddress: address } = await connectedApi.getUnshieldedAddress();
+    setApi(connectedApi);
+    setUnshieldedAddress(address);
+    setStatus('connected');
+    return connectedApi;
+  }, []);
+
   const connect = useCallback(async () => {
     setError(null);
     setStatus('connecting');
     try {
-      const wallets = listWallets();
-      setAvailableWallets(wallets);
-      if (wallets.length === 0) {
-        throw new Error('No Midnight wallet found. Install Lace and refresh the page.');
-      }
-      const connectedApi = await connectWallet(wallets[0], ACTIVE_NETWORK);
-      const { unshieldedAddress: address } = await connectedApi.getUnshieldedAddress();
-      setApi(connectedApi);
-      setUnshieldedAddress(address);
-      setStatus('connected');
+      await establish();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setStatus('error');
     }
-  }, []);
+  }, [establish]);
+
+  // Lace invalidates a dapp session when the wallet is locked/reopened even
+  // though the extension UI says it's open; a previously-connected API then
+  // answers every call with "Wallet is locked". Re-running the connect
+  // handshake refreshes the session (already-authorized connections don't
+  // re-prompt).
+  const reconnect = useCallback(async (): Promise<ConnectedAPI> => {
+    setError(null);
+    setStatus('connecting');
+    try {
+      return await establish();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setStatus('error');
+      throw err;
+    }
+  }, [establish]);
 
   const disconnect = useCallback(() => {
     setApi(null);
@@ -55,8 +78,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ status, error, api, unshieldedAddress, availableWallets, connect, disconnect, refreshWallets }),
-    [status, error, api, unshieldedAddress, availableWallets, connect, disconnect, refreshWallets],
+    () => ({ status, error, api, unshieldedAddress, availableWallets, connect, reconnect, disconnect, refreshWallets }),
+    [status, error, api, unshieldedAddress, availableWallets, connect, reconnect, disconnect, refreshWallets],
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
