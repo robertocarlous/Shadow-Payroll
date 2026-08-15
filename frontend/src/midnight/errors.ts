@@ -11,6 +11,7 @@
 // verbatim drowns the banner and pushes the actual cause chain out of
 // view, so long strings and nested objects are summarized instead.
 const MAX_INLINE_STRING = 300;
+const MAX_INLINE_ENTRIES = 200;
 const HUGEFIELD_EXCEPTIONS = new Set(['transactionId', 'txId']);
 
 function summarizeFields(value: unknown): string {
@@ -25,13 +26,18 @@ function summarizeFields(value: unknown): string {
       if (typeof v === 'object' && v !== null) {
         if (seen.has(v)) return '[circular]';
         seen.add(v);
-        const entries = Object.entries(v).map(([k, inner]) => {
+        const entries = Object.entries(v);
+        // Byte-blobs surface as { 0: 109, 1: 105, ... } with thousands of
+        // numeric-keyed entries -- far too big to inline. Collapse them to a
+        // one-line size hint so the real cause chain stays visible.
+        if (entries.length > MAX_INLINE_ENTRIES) return `<object ${entries.length} entries>`;
+        const collapsed = entries.map(([k, inner]) => {
           if (typeof inner === 'string' && inner.length > MAX_INLINE_STRING && !HUGEFIELD_EXCEPTIONS.has(k)) {
             return [k, `<string ${inner.length} chars>`];
           }
           return [k, inner];
         });
-        return Object.fromEntries(entries);
+        return Object.fromEntries(collapsed);
       }
       return v;
     });

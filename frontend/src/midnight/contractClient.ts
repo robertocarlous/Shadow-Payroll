@@ -9,6 +9,7 @@ import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-pri
 import { FetchZkConfigProvider } from '@midnight-ntwrk/midnight-js-fetch-zk-config-provider';
 import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 
+import { persistentHash, CompactTypeVector, Bytes32Descriptor } from '@midnight-ntwrk/compact-runtime';
 import * as Payroll from '../generated/payroll/index.js';
 import { NETWORK_CONFIGS, PROOF_SERVER_URL, type NetworkId } from '../network';
 import { makeWalletAndMidnightProvider, makeProofProvider } from './laceProviders';
@@ -49,6 +50,34 @@ async function withRetry<T>(fn: () => Promise<T>, onRetry?: DustRetryCallback): 
 }
 
 const ZK_BASE_URL = `${window.location.origin}/managed/payroll`;
+
+// Recomputes the `payeeNullifier` circuit output off-chain (see
+// contracts/payroll.compact: `persistentHash(["shadow-payroll:nullifier:v1",
+// secret])`). Used to detect an already-claimed credential before the wallet
+// wastes DUST building and signing a proof the node will reject with an
+// opaque SubmissionError (empty cause).
+const NULLIFIER_DOMAIN = new Uint8Array(32);
+new TextEncoder().encodeInto('shadow-payroll:nullifier:v1', NULLIFIER_DOMAIN);
+const NULLIFIER_VECTOR_TYPE = new CompactTypeVector(2, Bytes32Descriptor);
+
+function computeNullifier(secret: Uint8Array): Uint8Array {
+  return persistentHash(NULLIFIER_VECTOR_TYPE, [NULLIFIER_DOMAIN, secret]);
+}
+
+// True when the credential's nullifier is already spent on-chain. The wallet
+// connects, so we can read the live contract state directly from the indexer
+// instead of guessing from the (cryptic) submission error.
+async function isAlreadyClaimed(
+  publicDataProvider: { queryContractState(address: string): Promise<unknown> },
+  contractAddress: string,
+  credential: PayeeCredential,
+): Promise<boolean> {
+  const contractState = await publicDataProvider.queryContractState(contractAddress);
+  if (contractState === null || typeof contractState !== 'object') return false;
+  const ledger = Payroll.ledger((contractState as { data: unknown }).data as any);
+  const nullifier = computeNullifier(credential.secret);
+  return ledger.usedNullifiers.member(nullifier);
+}
 
 export async function submitClaim(
   api: ConnectedAPI,
@@ -99,6 +128,18 @@ export async function submitClaim(
     walletProvider: walletAndMidnightProvider,
     midnightProvider: walletAndMidnightProvider,
   };
+
+  // Fail fast with a clear message when this credential has already been
+  // spent -- otherwise the node rejects the duplicate nullifier at submit
+  // time with an opaque SubmissionError (empty `cause`), which is what
+  // surfaced after a prior attempt's tx actually landed despite the wallet
+  // channel dying mid-flight.
+  if (await isAlreadyClaimed(providers.publicDataProvider, contractAddress, credential)) {
+    throw new Error(
+      'This payout credential has already been claimed on-chain (its nullifier is already spent). ' +
+        'No further claim is possible for it.',
+    );
+  }
 
   const deployed: any = await findDeployedContract(providers, {
     compiledContract: compiledContract as any,
