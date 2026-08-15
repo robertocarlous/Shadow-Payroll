@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { useWallet } from '../context/WalletContext';
 import { submitClaim } from '../midnight/contractClient';
 import { parseCredential } from '../midnight/witnesses';
@@ -22,7 +23,27 @@ export function ClaimPanel() {
     reader.readAsText(file);
   }, []);
 
-  const isLockedError = useCallback((description: string) => /wallet is locked/i.test(description), []);
+  // A stale Lace connection can surface as "Wallet is locked" or as the whole
+  // Remote API channel being shut down -- "RemoteApiShutdownError: Remote API
+  // with channel 'midnight-wallet' was shutdown: object can no longer be
+  // used." Both mean the current `api` object is dead and will never answer
+  // again; the only fix is re-running the connect handshake to open a fresh
+  // channel, then retrying the claim.
+  const isStaleWalletError = useCallback(
+    (description: string) => /wallet is locked|remote api.*shutdown|channel.*was shutdown/i.test(description),
+    [],
+  );
+
+  const attemptClaim = useCallback(
+    async (apiToUse: ConnectedAPI): Promise<string> => {
+      const credential = parseCredential(credentialText);
+      const { txId } = await submitClaim(apiToUse, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (attempt, max) =>
+        setDustRetry({ attempt, max }),
+      );
+      return txId;
+    },
+    [credentialText],
+  );
 
   const handleClaim = useCallback(async () => {
     if (!api || !credentialText.trim()) return;
@@ -31,41 +52,40 @@ export function ClaimPanel() {
     setTxId(null);
     setDustRetry(null);
     try {
-      const credential = parseCredential(credentialText);
-      const { txId: id } = await submitClaim(api, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (attempt, max) =>
-        setDustRetry({ attempt, max }),
-      );
-      setTxId(id);
-      setCredentialText('');
-    } catch (err) {
-      const description = describeError(err);
-      if (isLockedError(description)) {
-        // Lace reports a stale "Wallet is locked" on sessions that predate a
-        // lock/reopen cycle even when the wallet is open. Refresh the dapp
-        // connection and retry once rather than dead-ending here.
-        setClaimError(
-          'Your wallet connection went stale (Lace reports it locked). Refreshing the connection and retrying…',
-        );
+      // Up to a couple of reconnects: a fresh channel is usually enough, but a
+      // channel can die again immediately (e.g. the wallet is mid lock/reopen
+      // cycle), so allow one more re-establish before giving up.
+      const MAX_ATTEMPTS = 3;
+      let currentApi = api;
+      for (let attempt = 1; ; attempt++) {
         try {
-          const freshApi = await reconnect();
-          const credential = parseCredential(credentialText);
-          const fresh = await submitClaim(freshApi, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (attempt, max) =>
-            setDustRetry({ attempt, max }),
-          );
-          setTxId(fresh.txId);
+          const txId = await attemptClaim(currentApi);
+          setTxId(txId);
           setCredentialText('');
           setClaimError(null);
-        } catch (retryErr) {
-          setClaimError(describeError(retryErr));
+          break;
+        } catch (err) {
+          const description = describeError(err);
+          if (attempt < MAX_ATTEMPTS && isStaleWalletError(description)) {
+            setClaimError(
+              attempt === 1
+                ? 'Your wallet connection went stale (Lace closed the session). Refreshing the connection and retrying…'
+                : "Still stale (Lace's connection keeps dropping). Reconnecting again…",
+            );
+            currentApi = await reconnect();
+            continue;
+          }
+          setClaimError(description);
+          break;
         }
-      } else {
-        setClaimError(description);
       }
+    } catch (err) {
+      setClaimError(describeError(err));
     } finally {
       setDustRetry(null);
       setSubmitting(false);
     }
-  }, [api, credentialText, isLockedError, reconnect]);
+  }, [api, attemptClaim, isStaleWalletError, reconnect]);
 
   return (
     <section className="card claim-panel" id="claim">
