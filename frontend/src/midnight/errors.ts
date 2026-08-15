@@ -5,14 +5,33 @@
 // objects, which aren't plain Errors and don't stringify to anything useful
 // via `String()` (just "[object Object]") - they need their own fields
 // (_tag, error, defect, etc.) picked out explicitly.
-function safeStringify(value: unknown): string {
+//
+// Several error classes carry a serialized transaction in `txData` (a
+// multi-megabyte hex blob) and fields like `transactionId`. Dumping those
+// verbatim drowns the banner and pushes the actual cause chain out of
+// view, so long strings and nested objects are summarized instead.
+const MAX_INLINE_STRING = 300;
+const HUGEFIELD_EXCEPTIONS = new Set(['transactionId', 'txId']);
+
+function summarizeFields(value: unknown): string {
   const seen = new WeakSet<object>();
   try {
     const json = JSON.stringify(value, (_key, v) => {
       if (typeof v === 'bigint') return `${v}n`;
+      if (typeof v === 'string') {
+        if (v.length > MAX_INLINE_STRING) return `<string ${v.length} chars>`;
+        return v;
+      }
       if (typeof v === 'object' && v !== null) {
         if (seen.has(v)) return '[circular]';
         seen.add(v);
+        const entries = Object.entries(v).map(([k, inner]) => {
+          if (typeof inner === 'string' && inner.length > MAX_INLINE_STRING && !HUGEFIELD_EXCEPTIONS.has(k)) {
+            return [k, `<string ${inner.length} chars>`];
+          }
+          return [k, inner];
+        });
+        return Object.fromEntries(entries);
       }
       return v;
     });
@@ -25,7 +44,7 @@ function safeStringify(value: unknown): string {
 function describeOne(current: unknown): { text: string; next: unknown } {
   if (current instanceof Error) {
     const withCause = current as Error & { cause?: unknown };
-    const extra = safeStringify({ ...current });
+    const extra = summarizeFields({ ...current });
     const message = current.message || current.constructor.name;
     return {
       text: extra && extra !== '{}' ? `${message} ${extra}` : message,
@@ -35,7 +54,7 @@ function describeOne(current: unknown): { text: string; next: unknown } {
   if (current && typeof current === 'object') {
     const obj = current as Record<string, unknown>;
     const tag = typeof obj._tag === 'string' ? obj._tag : undefined;
-    const dump = safeStringify(current);
+    const dump = summarizeFields(current);
     const text = [tag, dump || String(current)].filter(Boolean).join(': ');
     // Effect Cause-like shapes nest the real failure under `error` or `defect`.
     return { text, next: obj.error ?? obj.defect ?? obj.cause };
@@ -53,6 +72,7 @@ export function describeError(err: unknown): string {
     parts.push(text);
     current = next;
   }
-  console.error('describeError:', err);
-  return parts.join(' <- caused by: ');
+  const text = parts.join(' <- caused by: ');
+  console.error('describeError:', text);
+  return text;
 }
