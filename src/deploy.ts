@@ -323,7 +323,17 @@ async function main() {
         fullError.includes('Insufficient Funds') ||
         fullError.includes('could not balance dust');
 
-      if (!(isDustShortage && attempt === 1)) {
+      // Custom error 170 = InvalidDustSpendProof: the DUST spend proof embedded
+      // in the tx is stale by the time it reaches the node. The fix is to
+      // rebuild the unproven tx (fresh balance + fresh DUST proof) and resubmit
+      // on each attempt rather than re-presenting the same dead proof.
+      const isStaleDustProof =
+        fullError.includes('Custom error: 170') ||
+        fullError.includes('InvalidDustSpendProof') ||
+        fullError.includes('Transaction submission failed') ||
+        fullError.includes('Transaction submission error');
+
+      if (!((isDustShortage || isStaleDustProof) && attempt === 1)) {
         console.error(`\n  Attempt ${attempt} error: ${errMsg}`);
         if (errCause && errCause !== errMsg) console.error(`  Cause: ${errCause}`);
       }
@@ -338,18 +348,18 @@ async function main() {
         process.exit(1);
       }
 
-      if (isDustShortage) {
+      if (isDustShortage || isStaleDustProof) {
         const currentState = await walletCtx.wallet.waitForSyncedState();
         const dustBalance = currentState.dust.balance(new Date());
         if (attempt < MAX_RETRIES) {
           if (attempt === 1) {
-            console.log(`  Still generating DUST, retrying in ${RETRY_DELAY_MS / 1000}s...`);
+            console.log(`  ${isStaleDustProof ? 'Stale DUST proof (Custom error: 170)' : 'Still generating DUST'}, retrying in ${RETRY_DELAY_MS / 1000}s...`);
           } else {
             console.log(`  ⏳ DUST balance: ${dustBalance.toLocaleString()} (attempt ${attempt}/${MAX_RETRIES}); retrying in ${RETRY_DELAY_MS / 1000}s...`);
           }
           await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         } else {
-          console.log(`  ❌ Not enough DUST after ${MAX_RETRIES} retries (current: ${dustBalance.toLocaleString()})`);
+          console.log(`  ❌ ${isStaleDustProof ? 'DUST spend proof rejected after' : 'Not enough DUST after'} ${MAX_RETRIES} retries (current: ${dustBalance.toLocaleString()})`);
           await walletCtx.wallet.stop();
           process.exit(1);
         }
