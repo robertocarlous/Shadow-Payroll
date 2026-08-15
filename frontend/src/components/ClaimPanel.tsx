@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { useWallet } from '../context/WalletContext';
-import { submitClaim } from '../midnight/contractClient';
+import { submitClaim, type ClaimRetryInfo } from '../midnight/contractClient';
 import { parseCredential } from '../midnight/witnesses';
 import { describeError } from '../midnight/errors';
 import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from '../network';
@@ -10,8 +10,9 @@ export function ClaimPanel() {
   const { status: walletStatus, api, reconnect } = useWallet();
   const [credentialText, setCredentialText] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [dustRetry, setDustRetry] = useState<{ attempt: number; max: number } | null>(null);
+  const [retry, setRetry] = useState<ClaimRetryInfo | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
+  const [landed, setLanded] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -35,12 +36,9 @@ export function ClaimPanel() {
   );
 
   const attemptClaim = useCallback(
-    async (apiToUse: ConnectedAPI): Promise<string> => {
+    async (apiToUse: ConnectedAPI) => {
       const credential = parseCredential(credentialText);
-      const { txId } = await submitClaim(apiToUse, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (attempt, max) =>
-        setDustRetry({ attempt, max }),
-      );
-      return txId;
+      return submitClaim(apiToUse, ACTIVE_NETWORK, CONTRACT_ADDRESS, credential, (info) => setRetry(info));
     },
     [credentialText],
   );
@@ -50,7 +48,8 @@ export function ClaimPanel() {
     setSubmitting(true);
     setClaimError(null);
     setTxId(null);
-    setDustRetry(null);
+    setLanded(false);
+    setRetry(null);
     try {
       // Up to a couple of reconnects: a fresh channel is usually enough, but a
       // channel can die again immediately (e.g. the wallet is mid lock/reopen
@@ -59,10 +58,12 @@ export function ClaimPanel() {
       let currentApi = api;
       for (let attempt = 1; ; attempt++) {
         try {
-          const txId = await attemptClaim(currentApi);
-          setTxId(txId);
+          const result = await attemptClaim(currentApi);
           setCredentialText('');
           setClaimError(null);
+          setTxId(result.txId);
+          setLanded(result.landed);
+          setRetry(null);
           break;
         } catch (err) {
           const description = describeError(err);
@@ -82,7 +83,7 @@ export function ClaimPanel() {
     } catch (err) {
       setClaimError(describeError(err));
     } finally {
-      setDustRetry(null);
+      setRetry(null);
       setSubmitting(false);
     }
   }, [api, attemptClaim, isStaleWalletError, reconnect]);
@@ -154,8 +155,10 @@ export function ClaimPanel() {
               disabled={submitting || !credentialText.trim()}
             >
               {submitting
-                ? dustRetry
-                  ? `Waiting for DUST… (${dustRetry.attempt}/${dustRetry.max})`
+                ? retry
+                  ? retry.kind === 'dust'
+                    ? `Waiting for DUST… (${retry.attempt}/${retry.max})`
+                    : `Retrying submission… (${retry.attempt}/${retry.max})`
                   : 'Proving + submitting…'
                 : 'Claim payout'}
             </button>
@@ -177,6 +180,15 @@ export function ClaimPanel() {
           <strong>Claimed</strong>
           <span>Your payout was claimed on-chain. Watch the progress bar move.</span>
           <code className="claim-panel__txid">{txId}</code>
+        </div>
+      )}
+      {landed && !txId && (
+        <div className="banner banner--success">
+          <strong>Claimed</strong>
+          <span>
+            Your payout was submitted and is being confirmed on-chain. Refresh the page shortly to
+            see the contract progress update.
+          </span>
         </div>
       )}
     </section>

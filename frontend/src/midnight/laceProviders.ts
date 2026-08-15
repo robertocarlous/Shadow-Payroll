@@ -13,7 +13,7 @@ import type { MidnightProvider } from '@midnight-ntwrk/midnight-js-types';
 import { FetchZkConfigProvider } from '@midnight-ntwrk/midnight-js-fetch-zk-config-provider';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { MidnightBech32m, ShieldedCoinPublicKey, ShieldedEncryptionPublicKey } from '@midnight-ntwrk/wallet-sdk-address-format';
-import { describeError } from './errors';
+import { NODE_RPC_URL } from '../network';
 
 function hexToBytes(hex: string): Uint8Array {
   return new Uint8Array(Buffer.from(hex, 'hex'));
@@ -21,6 +21,164 @@ function hexToBytes(hex: string): Uint8Array {
 
 function bytesToHex(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString('hex');
+}
+
+// ─── Extrinsic wrapping ────────────────────────────────────────────────────────
+//
+// A Midnight transaction must NOT be submitted as its raw serialized bytes.
+// The node only accepts it wrapped in a substrate extrinsic dispatching the
+// `midnight.sendMnTransaction` call (pallet index 5, call index 0). Submitting
+// the bare tx as an extrinsic makes the runtime mis-decode it and trap in
+// TaggedTransactionQueue_validate_transaction (wasm unreachable). This
+// reproduces the exact bytes polkadot-js / the wallet-sdk produce:
+//
+//   compact(innerLen) + 0x04 (unsigned v4) + 0x05 0x00 (call index) +
+//   compact(txLen) + txBytes
+
+function compactLengthHex(n: number): string {
+  if (n < 64) return (n << 2).toString(16).padStart(2, '0');
+  if (n < 16384) {
+    const b0 = (((n & 0x3f) << 2) | 0x01).toString(16).padStart(2, '0');
+    const b1 = (n >> 6).toString(16).padStart(2, '0');
+    return b0 + b1;
+  }
+  if (n < 1 << 30) {
+    const b0 = (((n & 0x3f) << 2) | 0x02).toString(16).padStart(2, '0');
+    const b1 = ((n >> 6) & 0xff).toString(16).padStart(2, '0');
+    const b2 = ((n >> 14) & 0xff).toString(16).padStart(2, '0');
+    const b3 = ((n >> 22) & 0xff).toString(16).padStart(2, '0');
+    return b0 + b1 + b2 + b3;
+  }
+  throw new Error('transaction too large to submit');
+}
+
+function wrapMidnightExtrinsic(txHex: string): string {
+  const arg = compactLengthHex(txHex.length / 2) + txHex;
+  const inner = '04' + '0500' + arg;
+  return compactLengthHex(inner.length / 2) + inner;
+}
+
+// ─── Direct node-RPC submission fallback ───────────────────────────────────────
+//
+// Lace's submitTransaction reports failures as an opaque SubmissionError whose
+// cause is empty -- the node's real rejection (e.g. "Custom error: 170" for a
+// stale DUST spend proof) is stripped before it reaches the page. When that
+// happens we submit the *already-signed* tx straight to the public node RPC,
+// which streams back the actual dispatch result via author_submitAndWatchExtrinsic.
+// This both gets the tx in when Lace's transport drops it and surfaces a real
+// message when the chain genuinely rejects it. The tx must be wrapped in a
+// `midnight.sendMnTransaction` extrinsic first (see wrapMidnightExtrinsic),
+// otherwise the runtime panics decoding the bare tx bytes.
+
+interface RpcSubmitError extends Error {
+  definitive?: boolean;
+}
+
+function realError(message: string): RpcSubmitError {
+  const e = new Error(message) as RpcSubmitError;
+  e.definitive = true;
+  return e;
+}
+
+const NODE_RPC_TIMEOUT_MS = 90_000;
+
+function rpcSubmitOnce(hex: string, txId: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (err: RpcSubmitError | null, value?: string) => {
+      if (settled) return;
+      settled = true;
+      try {
+        ws.close();
+      } catch {
+        /* noop */
+      }
+      if (err) reject(err);
+      else resolve(value as string);
+    };
+    const ws = new WebSocket(NODE_RPC_URL);
+    const timeout = setTimeout(
+      () => finish(realError('Timed out waiting for the node to finalize the transaction.')),
+      NODE_RPC_TIMEOUT_MS,
+    );
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'author_submitAndWatchExtrinsic',
+          params: [`0x${wrapMidnightExtrinsic(hex)}`],
+          id: 1,
+        }),
+      );
+    };
+    ws.onmessage = (event) => {
+      let msg: { id?: number; method?: string; params?: { result?: unknown }; error?: { message?: string } };
+      try {
+        msg = JSON.parse(String(event.data));
+      } catch {
+        return;
+      }
+      if (msg.id === 1) {
+        if (msg.error) {
+          clearTimeout(timeout);
+          finish(realError(`Node RPC rejected the transaction: ${msg.error.message ?? JSON.stringify(msg.error)}`));
+        }
+        return;
+      }
+      if (msg.method === 'author_extrinsicUpdate') {
+        const statuses = Array.isArray(msg.params?.result) ? msg.params.result : [msg.params?.result];
+        for (const raw of statuses) {
+          if (!raw || typeof raw !== 'object') continue;
+          const st = raw as Record<string, unknown>;
+          if ('finalized' in st) {
+            clearTimeout(timeout);
+            finish(null, txId);
+            return;
+          }
+          if ('invalid' in st) {
+            clearTimeout(timeout);
+            finish(realError(`Transaction rejected by the node: ${JSON.stringify(st.invalid)}`));
+            return;
+          }
+          if ('dropped' in st) {
+            clearTimeout(timeout);
+            finish(realError(`Transaction dropped by the network: ${JSON.stringify(st.dropped)}`));
+            return;
+          }
+          if ('usurped' in st) {
+            clearTimeout(timeout);
+            finish(realError('Transaction was usurped (replaced) before finalization.'));
+            return;
+          }
+        }
+      }
+    };
+    ws.onerror = () => {
+      clearTimeout(timeout);
+      finish(new Error('Failed to connect to the Midnight node RPC.'));
+    };
+    ws.onclose = () => {
+      clearTimeout(timeout);
+      if (!settled) finish(new Error('Node RPC connection closed before the transaction was finalized.'));
+    };
+  });
+}
+
+async function submitViaNodeRpc(hex: string, txId: string): Promise<string> {
+  // Retries are only for transport-level failures (socket drop/timeout).
+  // A real chain rejection (definitive) must not be retried with the same
+  // bytes -- contractClient.ts rebuilds the whole tx in that case.
+  const MAX_ATTEMPTS = 3;
+  const RETRY_DELAY_MS = 3000;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      return await rpcSubmitOnce(hex, txId);
+    } catch (err) {
+      if ((err as RpcSubmitError).definitive || attempt === MAX_ATTEMPTS) throw err;
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    }
+  }
+  throw new Error('unreachable');
 }
 
 /**
@@ -57,33 +215,18 @@ export async function makeWalletAndMidnightProvider(
 
     async submitTx(tx) {
       const hex = bytesToHex(tx.serialize());
-      // The Preview RPC node has been observed to cleanly close the
-      // websocket (`1000: Normal Closure`) right as submission starts
-      // watching for inclusion, reproducibly. `tx` here is already fully
-      // balanced, proved, and signed (that happened in balanceTx above,
-      // which is the one call that triggers a Lace signing prompt) -- so
-      // retrying *only* this resubmission of the same bytes is safe and,
-      // critically, does not re-prompt the wallet. If a prior attempt
-      // actually landed despite the client-side error, the chain rejects
-      // the resubmission with a distinct "already submitted"-style error
-      // rather than repeating this disconnect, so this can't double-spend.
-      const MAX_ATTEMPTS = 6;
-      const RETRY_DELAY_MS = 4000;
-      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-        try {
-          await api.submitTransaction(hex);
-          return tx.identifiers()[0];
-        } catch (err) {
-          // Lace's submission errors, like the wallet-facade SDK's, come
-          // back as effect-library Cause objects that don't stringify
-          // usefully via String()/.message -- describeError unwraps them.
-          const description = describeError(err);
-          const isTransient = /transaction submission (error|failed)|normal closure/i.test(description);
-          if (!isTransient || attempt === MAX_ATTEMPTS) throw err;
-          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-        }
+      const txId = tx.identifiers()[0];
+      // Fast path: let Lace mediate submission through the wallet's node RPC.
+      try {
+        await api.submitTransaction(hex);
+        return txId;
+      } catch (err) {
+        // Lace strips the node's real rejection (opaque SubmissionError with
+        // an empty cause). Submit the already-signed tx directly to the
+        // public node RPC: it reports the actual dispatch result, so either
+        // the tx lands or the page shows the true rejection reason.
+        return await submitViaNodeRpc(hex, txId);
       }
-      throw new Error('unreachable');
     },
   };
 }

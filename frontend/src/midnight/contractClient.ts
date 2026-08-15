@@ -16,37 +16,37 @@ import { makeWalletAndMidnightProvider, makeProofProvider } from './laceProvider
 import { makeWitnesses, type PayeeCredential } from './witnesses';
 import { describeError } from './errors';
 
-export type DustRetryCallback = (attempt: number, maxAttempts: number) => void;
+export type ClaimRetryKind = 'dust' | 'submission';
+export type ClaimRetryInfo = { attempt: number; max: number; kind: ClaimRetryKind };
+export type ClaimRetryCallback = (info: ClaimRetryInfo) => void;
+
+export type ClaimResult = { txId: string | null; landed: boolean };
 
 // A brand-new (or recently used) wallet's reported DUST balance is a
 // time-projection of what its registered NIGHT will eventually generate;
 // the tx-builder only spends what the *next block's timestamp* accounts
 // for, which can lag wall-clock by roughly a block right after funding or
 // registration. Shows up as "Insufficient Funds: could not balance dust"
-// even when DUST is genuinely accruing. Retrying the whole claim() call is
-// necessary here (unlike a plain submission disconnect) because the
-// balancing math itself needs to be redone once more DUST has accrued --
-// that does mean a fresh Lace signing prompt per attempt, but this failure
-// mode is expected to be rare and short-lived, unlike the submission-level
-// disconnect handled without re-signing in laceProviders.ts's submitTx.
+// even when DUST is genuinely accruing.
 function isDustShortage(description: string): boolean {
   return /insufficient funds|not enough dust|could not balance dust/i.test(description);
 }
 
-async function withRetry<T>(fn: () => Promise<T>, onRetry?: DustRetryCallback): Promise<T> {
-  const MAX_RETRIES = 20;
-  const RETRY_DELAY_MS = 5000;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      const description = describeError(err);
-      if (!isDustShortage(description) || attempt === MAX_RETRIES) throw err;
-      onRetry?.(attempt, MAX_RETRIES);
-      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-    }
-  }
-  throw new Error('unreachable');
+// Submission through Lace surfaces as "Transaction submission failed /
+// Transaction submission error" with an (effect-library) cause that usually
+// has no inner message. Two distinct things hide behind that opaque banner:
+//
+// 1. Preview's RPC node cleanly closing its websocket mid-submission, so the
+//    tx may or may not have reached the chain (the loop below re-checks the
+//    nullifier to detect the "it actually landed" case).
+// 2. The node rejecting the tx because its DUST spend proof went stale
+//    between balancing and arrival (Custom error 170) -- in-browser proving
+//    of the 19MB claim key takes long enough that this is common. Same-bytes
+//    resubmission can never fix this; the tx must be rebuilt so a fresh
+//    DUST proof is generated. That is why retrying the whole claim() call
+//    (fresh balance + fresh proof) is required, not just resubmitting.
+function isRetryableSubmission(description: string): boolean {
+  return /transaction submission (error|failed)|submissionerror/i.test(description);
 }
 
 const ZK_BASE_URL = `${window.location.origin}/managed/payroll`;
@@ -84,8 +84,8 @@ export async function submitClaim(
   networkId: NetworkId,
   contractAddress: string,
   credential: PayeeCredential,
-  onDustRetry?: DustRetryCallback,
-): Promise<{ txId: string }> {
+  onRetry?: ClaimRetryCallback,
+): Promise<ClaimResult> {
   setNetworkId(networkId);
 
   const config = await api.getConfiguration().catch(() => null);
@@ -146,6 +146,27 @@ export async function submitClaim(
     contractAddress,
   });
 
-  const tx = await withRetry<any>(() => deployed.callTx.claim(), onDustRetry);
-  return { txId: tx.public.txId as string };
+  const MAX_RETRIES = 10;
+  const RETRY_DELAY_MS = 6000;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    // If a previous attempt's tx actually landed despite the wallet reporting
+    // a submission error (Preview's node is known to close the socket right
+    // as a submission begins), the nullifier is spent by now. Detect that
+    // and report success instead of re-prompting the wallet to re-spend it.
+    if (await isAlreadyClaimed(providers.publicDataProvider, contractAddress, credential)) {
+      return { txId: null, landed: true };
+    }
+    try {
+      const tx = await deployed.callTx.claim();
+      return { txId: tx.public.txId as string, landed: false };
+    } catch (err) {
+      const description = describeError(err);
+      const dust = isDustShortage(description);
+      const submission = isRetryableSubmission(description);
+      if ((!dust && !submission) || attempt === MAX_RETRIES) throw err;
+      onRetry?.({ attempt, max: MAX_RETRIES, kind: dust ? 'dust' : 'submission' });
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    }
+  }
+  throw new Error('unreachable');
 }
