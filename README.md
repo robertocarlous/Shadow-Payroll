@@ -7,12 +7,13 @@
 - **Live audit dashboard (try it yourself):** https://shadow-payroll.vercel.app
   — a wallet-connected "Claim a payout" button, not just numbers. See
   [Try it yourself](#try-it-yourself) below.
+- **Contract address (live dashboard, Preview):** `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0`
 - **Contract address (judge-testable instance, Preview):** `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369`
 - **Contract address (first completed run, Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
 - **Level 5 submission map:** [docs/LEVEL5.md](docs/LEVEL5.md)
 - **Product X profile:** _TODO: add link_
-- **Demo video:** _TODO: add link_ (see the recording checklist in
-  [docs/LEVEL5.md](docs/LEVEL5.md))
+- **Demo video:** https://www.loom.com/share/eb48ddadfac6462393968868a784c57f
+  (see the recording checklist in [docs/LEVEL5.md](docs/LEVEL5.md))
 
 ## Level 5 — Full Moon
 
