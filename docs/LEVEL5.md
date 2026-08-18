@@ -38,8 +38,8 @@ the public running total without revealing which payee claimed. The root and
 budget in `root.json` are the values an employer funds on-chain.
 
 The canonical list of the 50 invited users and their wallet addresses is
-tracked in the
-[50-user address sheet](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953).
+tracked in [USERS.md](../USERS.md) (also available as a
+[50-user address sheet](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953)).
 
 **To bring the cohort payroll live on Preview** (documented step, one
 command each):
@@ -81,12 +81,12 @@ the UI overhaul, the cohort artifact, CI, tests, and documentation.
 |---|---|
 | Public GitHub repository, updated docs | `github.com/robertocarlous/Shadow-Payroll`, `main` |
 | Same MVP as Level 4, extended | `contracts/payroll.compact`, `src/`, frontend |
-| 50 users (verifiable wallet addresses) | [50-user address sheet](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953) |
+| 50 users (verifiable wallet addresses) | [USERS.md](../USERS.md) |
 | Feedback loop documented | [docs/FEEDBACK-LOOP.md](FEEDBACK-LOOP.md) |
 | Updated documentation | README + docs (see above) |
 | Live demo link | https://shadow-payroll.vercel.app |
 | Contract address (live dashboard, Preview) | `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0` |
-| List of 50 user addresses | [50-user address sheet](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953) |
+| List of 50 user addresses | [USERS.md](../USERS.md) |
 | Addresses verifiable on-chain | claims against the contract's allowlist root are provable on-chain via ZK proofs |
 | Feedback documentation | [docs/FEEDBACK-LOOP.md](FEEDBACK-LOOP.md) + [docs/level5/FEEDBACK.md](level5/FEEDBACK.md) |
 | Demo video | [Full Moon demo video](https://www.loom.com/share/eb48ddadfac6462393968868a784c57f) |

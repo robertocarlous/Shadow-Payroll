@@ -25,6 +25,9 @@ and a **documented feedback loop**
 ([docs/FEEDBACK-LOOP.md](docs/FEEDBACK-LOOP.md)) with a public changelog
 ([docs/level5/FEEDBACK.md](docs/level5/FEEDBACK.md)).
 
+- **50 user wallet addresses:** [USERS.md](USERS.md) — verifiable on-chain
+  via bulk registration TX `00404c6c…1ec293` (block 415485)
+
 The cohort's payout credentials are committed under `docs/level5/`. The
 [judge-testable](docs/level5/root.json) allowlist root is what gets funded
 on-chain to bring the cohort live; see
