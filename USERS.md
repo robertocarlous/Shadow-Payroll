@@ -81,17 +81,6 @@ zero-knowledge proofs verifiable without revealing which payee claimed.
 | 49 | user49 | `f6d55a514d669476dca318a18224d50bb046668d6e94df863bd3b47ae0b7b499` | 245 | 2026-08-17 |
 | 50 | user50 | `8acf4b44d1d89d579728832f8cc7fe347d6559650afdafcc3c144b98d3d6a0d3` | 250 | 2026-08-17 |
 
-## Onboarding batches
-
-Users were onboarded in daily batches as they completed setup:
-
-| Batch | Date | Users | Notes |
-|-------|------|-------|-------|
-| 1 | 2026-08-13 | user01–user05 | Initial cohort launch; core team and early testers |
-| 2 | 2026-08-14 | user06–user15 | Expanded after faucet issues resolved |
-| 3 | 2026-08-15 | user16–user25 | Mid-week wave; proof-server setup stabilised |
-| 4 | 2026-08-16 | user26–user33 | Weekend onboarding; reduced faucet wait times |
-| 5 | 2026-08-17 | user34–user50 | Final wave; all remaining invitees completed setup |
 
 ## Credential files
 
