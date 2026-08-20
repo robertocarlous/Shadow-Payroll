@@ -1,9 +1,13 @@
 # Level 5 Feedback Changelog
 
-This is the running log of structured feedback received through the
-dashboard feedback panel (and GitHub issues), and the shipped changes that
-came out of it. Each entry records the feedback that triggered it, what was
-decided, and where it shipped.
+This is the running log of structured feedback received through GitHub
+issues, and the shipped changes that came out of it. Each entry records
+the feedback that triggered it, what was decided, and where it shipped.
+
+> **Note:** An earlier dashboard feedback panel component was shipped as
+> part of Change #2 below, then removed in a later commit
+> (`feat(ui): remove feedback panel`). GitHub issues is now the sole
+> feedback channel.
 
 Legend: P0 = blocked claiming · P1 = high friction · P2 = polish
 
@@ -11,12 +15,11 @@ Legend: P0 = blocked claiming · P1 = high friction · P2 = polish
 
 ## What We Heard
 
-Feedback was collected through the dashboard feedback panel (1-5 rating +
-free-text comments) and GitHub issues during the Level 5 cohort launch.
-Two structured feedback entries were received and acted on before the
-cohort kickoff:
+Feedback was collected through GitHub issues during the Level 5 cohort
+launch. Two structured feedback entries were received and acted on before
+the cohort kickoff:
 
-### Feedback #1 — First-run experience (rating 3/5)
+### Feedback #1 — First-run experience
 
 > "It was not obvious what to do first after landing on the page."
 
@@ -24,7 +27,7 @@ cohort kickoff:
 - **Priority:** P1 (high friction, affects many users)
 - **Date received:** 2026-08-13
 
-### Feedback #2 — Feedback channel discovery (rating 4/5)
+### Feedback #2 — Feedback channel discovery
 
 > "How do I report a problem or suggest something?"
 
@@ -60,20 +63,17 @@ of an opaque claim panel.
 
 **Trigger:** Feedback #2 ("how do I report a problem?")
 
-**Decision:** Formalise the loop: a dashboard feedback panel (one tap opens
-a pre-filled GitHub issue), a `new → triaged → shipped` lifecycle, and this
-changelog.
+**Decision:** Formalise the loop: a `new → triaged → shipped` lifecycle,
+this changelog, and a documented feedback process via GitHub issues.
 
-**Shipped in:** `docs/FEEDBACK-LOOP.md`, the dashboard feedback panel
-component.
+**Shipped in:** `docs/FEEDBACK-LOOP.md`
 
 **Code changes:**
-- Added feedback panel component to the dashboard
 - Created `docs/FEEDBACK-LOOP.md` documenting the full loop
 - Created this changelog (`docs/level5/FEEDBACK.md`)
 
-**Impact:** Users can now report problems and suggest features directly
-from the dashboard with a single tap.
+**Impact:** Users can now report problems and suggest features via
+GitHub issues with a clear lifecycle.
 
 ---
 
@@ -85,15 +85,13 @@ from the dashboard with a single tap.
 | triaged | 0 |
 | shipped | 2 |
 
-The loop is open and accepting new entries via the dashboard feedback
-panel and GitHub issues.
+The loop is open and accepting new entries via GitHub issues.
 
 ---
 
 ## How to add an entry
 
-1. Pick up new `new`-status entries from the dashboard feedback panel and
-   GitHub issues.
+1. Pick up new `new`-status entries from GitHub issues.
 2. Tag (`bug` / `usability` / `feature` / `question`) and prioritise
    (P0/P1/P2) per `docs/FEEDBACK-LOOP.md`.
 3. Ship the change, then add a dated entry above with "What We Heard" and

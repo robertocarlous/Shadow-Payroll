@@ -9,16 +9,15 @@ and how a decision becomes a shipped change with a changelog entry.
 
 | Channel | How it works | Data |
 |---|---|---|
-| Dashboard feedback panel | 1–5 rating buttons, then a free-text comment; one tap opens a pre-filled GitHub issue | One tap to send; identical format |
 | GitHub issues | Report a bug or suggestion on the repo | Standard issue tracker |
 
-Every feedback entry records: **who** (GitHub username / email), **rating**,
+Every feedback entry records: **who** (GitHub username / email),
 **comment**, **timestamp**, and a **status** the loop can advance.
 
 ## 2. Triage — weekly cadence
 
 - **Weekly (Monday):** an operator (any maintainer) exports new entries from
-  the dashboard feedback panel and GitHub issues, deduplicates, and tags
+  GitHub issues, deduplicates, and tags
   each one:
   - `bug` — something is broken (e.g. claim fails, wrong copy)
   - `usability` — a step was confusing or took too long
@@ -45,7 +44,7 @@ Each accepted item is turned into a small, dated task and worked in the open
 Every shipped decision is recorded in
 [docs/level5/FEEDBACK.md](level5/FEEDBACK.md) as a dated entry with:
 
-- the feedback that triggered it (rating + theme),
+- the feedback that triggered it (theme + description),
 - what was decided, and
 - the commit/PR that shipped it.
 

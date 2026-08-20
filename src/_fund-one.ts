@@ -3,6 +3,7 @@ globalThis.WebSocket = WebSocket as unknown as typeof globalThis.WebSocket;
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
@@ -107,7 +108,7 @@ async function main() {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       console.log('Submitting fundPayroll (proving + signing)...');
-      const tx = await deployed.callTx.fundPayroll(root, budget);
+      const tx = await deployed.callTx.fundPayroll(root, budget, 0n, randomBytes(32));
       console.log(`\nFUND OK. txId: ${tx.public.txId}`);
       await persistWalletState(network, walletCtx);
       await walletCtx.wallet.stop();

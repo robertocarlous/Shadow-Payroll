@@ -18,8 +18,8 @@ extensions are about **meeting real users**:
    - [credentials/](level5/credentials/) — one disposable payout credential
      per payee, each committing its `{secret, amount}` leaf to that root
 2. **An intuitive dashboard.** The frontend was rebuilt as a guided product
-   page: onboarding checklist, how-it-works, FAQ, community stats, and a
-   feedback panel. See the live link below.
+   page: onboarding checklist, how-it-works, FAQ, and community stats.
+   See the live link below.
 
 ## 50 Preprod users (verifiable wallet addresses)
 
@@ -57,7 +57,7 @@ starts the proof-server → claims on the dashboard with their credential.
 ## Feedback loop documented
 
 [docs/FEEDBACK-LOOP.md](FEEDBACK-LOOP.md) describes the full loop end to end:
-channels (dashboard feedback panel + GitHub issues), how entries are stored
+channels (GitHub issues), how entries are stored
 with a `new → triaged → shipped` status lifecycle, the weekly triage
 cadence, and how decisions land in the changelog with the prioritised list.
 
@@ -96,11 +96,10 @@ the UI overhaul, the cohort artifact, CI, tests, and documentation.
 
 ▶ **[Full Moon demo video](https://www.loom.com/share/eb48ddadfac6462393968868a784c57f)**
 
-Recording checklist (fill in once the video exists):
+Recording checklist:
 
-- [ ] Walk through `docs/level5/root.json` and `credentials/user01.json`
-- [ ] Show the dashboard live on Preview: status tiles, progress bar, community stats
-- [ ] Show the onboarding checklist and FAQ
-- [ ] Claim a payout end to end (Lace → proof-server → dashboard progress)
-- [ ] Submit feedback from the dashboard panel and show the entry land in the loop
+- [x] Walk through `docs/level5/root.json` and `credentials/user01.json`
+- [x] Show the dashboard live on Preview: status tiles, progress bar, community stats
+- [x] Show the onboarding checklist and FAQ
+- [x] Claim a payout end to end (Lace → proof-server → dashboard progress)
 - [x] Link the recording here

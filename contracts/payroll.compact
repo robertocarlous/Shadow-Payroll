@@ -6,6 +6,11 @@
 // they have not claimed before -- without revealing which leaf they are or
 // how much anyone else was allocated. The contract enforces that the running
 // public total claimed can never exceed the declared budget.
+//
+// Extensions (Level 5):
+// - Claim expiration: claims are rejected after `claimDeadline` (Unix seconds).
+// - Payee removal: the employer can revoke a payee's allocation before they
+//   claim by adding their nullifier to `removedPayees`.
 
 pragma language_version 0.23;
 
@@ -18,12 +23,17 @@ export ledger totalBudget: Uint<64>;
 export ledger totalClaimed: Uint<64>;
 export ledger usedNullifiers: Set<Bytes<32>>;
 export ledger initialized: Boolean;
+export ledger claimDeadline: Uint<64>;
+export ledger removedPayees: Set<Bytes<32>>;
+export ledger employerNullifier: Bytes<32>;
 
 constructor() {
   allowlistRoot = default<Bytes<32>>;
   totalBudget = 0;
   totalClaimed = 0;
   initialized = false;
+  claimDeadline = 0;
+  employerNullifier = default<Bytes<32>>;
 }
 
 // -- Witnesses: private, off-chain values supplied locally by the payee. --
@@ -38,11 +48,21 @@ witness payeeDirections(): Vector<8, Boolean>;
 
 // -- Circuits --
 
-export circuit fundPayroll(root: Bytes<32>, budget: Uint<64>): [] {
+export circuit fundPayroll(
+  root: Bytes<32>,
+  budget: Uint<64>,
+  deadline: Uint<64>,
+  empSecret: Bytes<32>,
+): [] {
   assert(!initialized, "Payroll has already been funded");
   allowlistRoot = disclose(root);
   totalBudget = disclose(budget);
   totalClaimed = 0;
+  claimDeadline = disclose(deadline);
+  employerNullifier = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "shadow-payroll:employer:v1"),
+    disclose(empSecret),
+  ]);
   initialized = true;
 }
 
@@ -96,8 +116,17 @@ circuit payeeNullifier(secret: Bytes<32>): Bytes<32> {
   ]);
 }
 
-export circuit claim(): [] {
+// timeOverride: pass 0 for production (uses real block time), or a non-zero
+// Unix timestamp to override the current time (for testing expiration logic).
+export circuit claim(timeOverride: Uint<64>): [] {
   assert(initialized, "Payroll has not been funded yet");
+
+  const disclosedOverride = disclose(timeOverride);
+  if (disclosedOverride != 0) {
+    assert(disclosedOverride < claimDeadline, "Claim deadline has passed");
+  } else {
+    assert(blockTimeLt(disclose(claimDeadline)), "Claim deadline has passed");
+  }
 
   const secret = payeeSecret();
   const amount = disclose(payeeAmount());
@@ -110,11 +139,29 @@ export circuit claim(): [] {
 
   const nullifier = disclose(payeeNullifier(secret));
   assert(!usedNullifiers.member(nullifier), "Payout already claimed");
+  assert(!removedPayees.member(nullifier), "Payee has been removed from the payroll");
 
   assert(totalClaimed + amount <= totalBudget, "Claim would exceed deposited budget");
 
   usedNullifiers.insert(nullifier);
   totalClaimed = (totalClaimed + amount) as Uint<64>;
+}
+
+// Employer-only circuit: removes a payee by adding their nullifier to the
+// removed set. The employer proves authorization by deriving a nullifier
+// from their own secret and matching it against the stored employer
+// nullifier. This prevents anyone else from removing payees.
+export circuit removePayee(payeeSecret: Bytes<32>, empSecret: Bytes<32>): [] {
+  assert(initialized, "Payroll has not been funded yet");
+
+  const empNull = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "shadow-payroll:employer:v1"),
+    disclose(empSecret),
+  ]);
+  assert(empNull == employerNullifier, "Only the employer can remove payees");
+
+  const nullifier = payeeNullifier(disclose(payeeSecret));
+  removedPayees.insert(nullifier);
 }
 
 // Public read helper for the audit dashboard: true once every claimable

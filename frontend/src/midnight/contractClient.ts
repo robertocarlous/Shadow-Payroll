@@ -79,6 +79,19 @@ async function isAlreadyClaimed(
   return ledger.usedNullifiers.member(nullifier);
 }
 
+// True when the credential's payee has been removed by the employer.
+async function isRemoved(
+  publicDataProvider: { queryContractState(address: string): Promise<unknown> },
+  contractAddress: string,
+  credential: PayeeCredential,
+): Promise<boolean> {
+  const contractState = await publicDataProvider.queryContractState(contractAddress);
+  if (contractState === null || typeof contractState !== 'object') return false;
+  const ledger = Payroll.ledger((contractState as { data: unknown }).data as any);
+  const nullifier = computeNullifier(credential.secret);
+  return ledger.removedPayees.member(nullifier);
+}
+
 export async function submitClaim(
   api: ConnectedAPI,
   networkId: NetworkId,
@@ -141,6 +154,14 @@ export async function submitClaim(
     );
   }
 
+  // Fail fast when the employer has removed this payee before they could claim.
+  if (await isRemoved(providers.publicDataProvider, contractAddress, credential)) {
+    throw new Error(
+      'This payee has been removed from the payroll by the employer. ' +
+        'No claim is possible for this credential.',
+    );
+  }
+
   const deployed: any = await findDeployedContract(providers, {
     compiledContract: compiledContract as any,
     contractAddress,
@@ -157,7 +178,7 @@ export async function submitClaim(
       return { txId: null, landed: true };
     }
     try {
-      const tx = await deployed.callTx.claim();
+      const tx = await deployed.callTx.claim(0n);
       return { txId: tx.public.txId as string, landed: false };
     } catch (err) {
       const description = describeError(err);

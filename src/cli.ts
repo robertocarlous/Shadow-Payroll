@@ -7,6 +7,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { WebSocket } from 'ws';
 
@@ -104,11 +105,15 @@ async function createProviders(walletCtx: WalletContext) {
 
 function printLedger(l: any) {
   const reconciled = l.initialized && l.totalClaimed === l.totalBudget;
+  const deadlineTs = Number(l.claimDeadline);
+  const deadlineStr = deadlineTs === 0 ? 'none' : new Date(deadlineTs * 1000).toISOString();
   console.log(`\n  📋 Initialized:     ${l.initialized}`);
   console.log(`  📋 Allowlist root:  ${Buffer.from(l.allowlistRoot).toString('hex')}`);
   console.log(`  📋 Total budget:    ${l.totalBudget.toString()}`);
   console.log(`  📋 Total claimed:   ${l.totalClaimed.toString()}`);
   console.log(`  📋 Claims made:     ${l.usedNullifiers.size().toString()}`);
+  console.log(`  📋 Claim deadline:  ${deadlineStr}`);
+  console.log(`  📋 Removed payees:  ${l.removedPayees.size().toString()}`);
   console.log(`  📋 Reconciled:      ${reconciled ? '✅ fully reconciled' : '❌ not yet'}\n`);
 }
 
@@ -172,20 +177,32 @@ async function main() {
       console.log('  1. Fund payroll (employer) — needs .payroll/root.json');
       console.log('  2. Claim payout (payee) — needs your credentials/<id>.json');
       console.log('  3. View public audit state (deposited / claimed / reconciled)');
-      console.log('  4. Check wallet balance');
-      console.log('  5. Exit\n');
+      console.log('  4. Remove a payee (employer) — revoke before they claim');
+      console.log('  5. Check wallet balance');
+      console.log('  6. Exit\n');
 
       const choice = await rl.question('  Your choice: ');
 
       switch (choice.trim()) {
         case '1': {
           const rootPath = (await rl.question('  Path to root.json [.payroll/root.json]: ')).trim() || '.payroll/root.json';
+          const deadlineInput = (await rl.question('  Claim deadline (Unix seconds, 0 = no expiration) [0]: ')).trim() || '0';
+          const deadline = BigInt(deadlineInput);
           try {
             const { allowlistRoot, totalBudget } = JSON.parse(fs.readFileSync(path.resolve(rootPath), 'utf-8'));
+            const empSecret = randomBytes(32);
             console.log('\n  Submitting fundPayroll transaction (this may take 30-60 seconds)...');
-            const tx = await deployed.callTx.fundPayroll(fromHex(allowlistRoot), BigInt(totalBudget));
+            const tx = await deployed.callTx.fundPayroll(
+              fromHex(allowlistRoot),
+              BigInt(totalBudget),
+              deadline,
+              empSecret,
+            );
             console.log(`\n  ✅ Payroll funded. Budget: ${totalBudget}`);
             console.log(`  Transaction ID: ${tx.public.txId}\n`);
+            if (deadline > 0n) {
+              console.log(`  ⏰ Claims expire: ${new Date(Number(deadline) * 1000).toISOString()}\n`);
+            }
           } catch (error) {
             console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
           }
@@ -202,7 +219,7 @@ async function main() {
               contractAddress: deployment.address,
             });
             console.log('  Submitting claim transaction (this may take 30-60 seconds)...');
-            const tx = await deployed.callTx.claim();
+            const tx = await deployed.callTx.claim(0n);
             console.log(`\n  ✅ Claim submitted for "${credential.payeeId}"`);
             console.log(`  Transaction ID: ${tx.public.txId}\n`);
             // Reconnect without a credential loaded so subsequent menu
@@ -233,6 +250,27 @@ async function main() {
         }
 
         case '4': {
+          const payeePath = await rl.question('  Path to the payee credential JSON to remove: ');
+          try {
+            const payeeCred = loadCredential(payeePath.trim());
+            const empSecretInput = (await rl.question('  Your employer secret (hex): ')).trim();
+            const empSecretBytes = fromHex(empSecretInput);
+            console.log('\n  Submitting removePayee transaction (this may take 30-60 seconds)...');
+            const tx = await deployed.callTx.removePayee(payeeCred.secret, empSecretBytes);
+            console.log(`\n  ✅ Payee "${payeeCred.payeeId}" removed from the payroll.`);
+            console.log(`  Transaction ID: ${tx.public.txId}\n`);
+            // Reconnect without a credential loaded.
+            deployed = await findDeployedContract(providers, {
+              compiledContract: makeCompiledContract(null) as any,
+              contractAddress: deployment.address,
+            });
+          } catch (error) {
+            console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '5': {
           console.log('\n  Checking balance...');
           const currentState = await walletCtx.wallet.waitForSyncedState();
           const currentBalance = currentState.unshielded.balances[unshieldedToken().raw] ?? 0n;
@@ -242,13 +280,13 @@ async function main() {
           break;
         }
 
-        case '5':
+        case '6':
           running = false;
           console.log('\n  👋 Goodbye!\n');
           break;
 
         default:
-          console.log('\n  ❌ Invalid choice. Please enter 1-5.\n');
+          console.log('\n  ❌ Invalid choice. Please enter 1-6.\n');
       }
     }
 

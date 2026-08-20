@@ -41,17 +41,33 @@ export class PayrollSimulator {
     return ledger(this.circuitContext.currentQueryContext.state);
   }
 
-  public fundPayroll(root: Uint8Array, budget: bigint): Ledger {
+  public fundPayroll(
+    root: Uint8Array,
+    budget: bigint,
+    deadline: bigint = BigInt('4102444800'), // 2100-01-01 (far future = no expiration)
+    empSecret: Uint8Array = new Uint8Array(32).fill(0xab),
+  ): Ledger {
     this.circuitContext = this.contract.impureCircuits.fundPayroll(
       this.circuitContext,
       root,
       budget,
+      deadline,
+      empSecret,
     ).context;
     return this.getLedger();
   }
 
-  public claim(): Ledger {
-    this.circuitContext = this.contract.impureCircuits.claim(this.circuitContext).context;
+  public claim(timeOverride: bigint = 0n): Ledger {
+    this.circuitContext = this.contract.impureCircuits.claim(this.circuitContext, timeOverride).context;
+    return this.getLedger();
+  }
+
+  public removePayee(payeeSecret: Uint8Array, empSecret: Uint8Array): Ledger {
+    this.circuitContext = this.contract.impureCircuits.removePayee(
+      this.circuitContext,
+      payeeSecret,
+      empSecret,
+    ).context;
     return this.getLedger();
   }
 

@@ -10,16 +10,26 @@ export type Witnesses<PS> = {
 export type ImpureCircuits<PS> = {
   fundPayroll(context: __compactRuntime.CircuitContext<PS>,
               root_0: Uint8Array,
-              budget_0: bigint): __compactRuntime.CircuitResults<PS, []>;
-  claim(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+              budget_0: bigint,
+              deadline_0: bigint,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  claim(context: __compactRuntime.CircuitContext<PS>, timeOverride_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  removePayee(context: __compactRuntime.CircuitContext<PS>,
+              payeeSecret_0: Uint8Array,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   isReconciled(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
 export type ProvableCircuits<PS> = {
   fundPayroll(context: __compactRuntime.CircuitContext<PS>,
               root_0: Uint8Array,
-              budget_0: bigint): __compactRuntime.CircuitResults<PS, []>;
-  claim(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+              budget_0: bigint,
+              deadline_0: bigint,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  claim(context: __compactRuntime.CircuitContext<PS>, timeOverride_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  removePayee(context: __compactRuntime.CircuitContext<PS>,
+              payeeSecret_0: Uint8Array,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   isReconciled(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
@@ -29,8 +39,13 @@ export type PureCircuits = {
 export type Circuits<PS> = {
   fundPayroll(context: __compactRuntime.CircuitContext<PS>,
               root_0: Uint8Array,
-              budget_0: bigint): __compactRuntime.CircuitResults<PS, []>;
-  claim(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+              budget_0: bigint,
+              deadline_0: bigint,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  claim(context: __compactRuntime.CircuitContext<PS>, timeOverride_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  removePayee(context: __compactRuntime.CircuitContext<PS>,
+              payeeSecret_0: Uint8Array,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   isReconciled(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
@@ -45,6 +60,14 @@ export type Ledger = {
     [Symbol.iterator](): Iterator<Uint8Array>
   };
   readonly initialized: boolean;
+  readonly claimDeadline: bigint;
+  removedPayees: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(elem_0: Uint8Array): boolean;
+    [Symbol.iterator](): Iterator<Uint8Array>
+  };
+  readonly employerNullifier: Uint8Array;
 }
 
 export type ContractReferenceLocations = any;
