@@ -30,7 +30,7 @@ const STEPS = [
   {
     id: 'connect',
     title: 'Connect your wallet here',
-    body: 'Press "Connect Lace" in the bar above. The dashboard shows your connected address, and the claim panel unlocks.',
+    body: 'Press "Connect Lace" at the top right of the page. The dashboard shows your connected address, and the claim panel unlocks.',
   },
   {
     id: 'claim',

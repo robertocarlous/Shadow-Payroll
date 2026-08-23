@@ -56,6 +56,15 @@ function Stars() {
   );
 }
 
+const NAV_LINKS = [
+  ['#status', 'Status'],
+  ['#community', 'Cohort'],
+  ['#how-it-works', 'How it works'],
+  ['#onboarding', 'Get started'],
+  ['#claim', 'Claim'],
+  ['#faq', 'FAQ'],
+] as const;
+
 export default function App() {
   const state = usePayrollState();
   const claimsMade = state.status === 'ready' ? Number(state.state.claimsMade) : 0;
@@ -66,19 +75,27 @@ export default function App() {
         <Stars />
 
         <header className="header">
-          <div className="header__brand">
+          <a className="header__brand" href="#top">
             <span className="header__logo" aria-hidden="true">
               🌕
             </span>
             <span className="header__name">Shadow Payroll</span>
+          </a>
+          <nav className="header__nav" aria-label="Page sections">
+            {NAV_LINKS.map(([href, label]) => (
+              <a key={href} href={href} className="header__link">
+                {label}
+              </a>
+            ))}
+          </nav>
+          <div className="header__right">
+            <span className="header__badge">Live · {ACTIVE_NETWORK}</span>
+            <WalletBar />
           </div>
-          <span className="header__badge">Live · {ACTIVE_NETWORK}</span>
         </header>
 
-        <main className="layout">
+        <main className="layout" id="top">
           <Hero />
-
-          <WalletBar />
 
           <PayrollStatus state={state} />
           <CommunityStats claimsMade={claimsMade} />

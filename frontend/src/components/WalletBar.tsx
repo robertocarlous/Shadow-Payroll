@@ -1,42 +1,39 @@
 import { useWallet } from '../context/WalletContext';
-import { ACTIVE_NETWORK } from '../network';
 
 const STATUS_LABEL: Record<string, string> = {
-  disconnected: 'Wallet not connected',
+  disconnected: 'Connect Lace',
   connecting: 'Connecting…',
   connected: 'Connected',
-  error: 'Connection error',
+  error: 'Retry connection',
 };
 
+/**
+ * Compact wallet control that lives in the sticky top nav.
+ */
 export function WalletBar() {
   const { status, error, unshieldedAddress, connect, disconnect } = useWallet();
+  const connected = status === 'connected';
 
   return (
-    <div className="wallet-bar">
-      <div className="wallet-bar__info">
-        <span className={`wallet-dot wallet-dot--${status}`} aria-hidden="true" />
-        <div className="wallet-bar__text">
-          <span className="wallet-bar__status">{STATUS_LABEL[status]}</span>
-          <span className="muted"> · {ACTIVE_NETWORK}</span>
-        </div>
-        {status === 'connected' && unshieldedAddress && (
-          <code className="wallet-bar__address">
-            {unshieldedAddress.slice(0, 14)}…{unshieldedAddress.slice(-6)}
-          </code>
-        )}
-      </div>
-      <div className="wallet-bar__actions">
-        {status === 'connected' ? (
-          <button className="btn btn--ghost" onClick={disconnect}>
-            Disconnect
-          </button>
-        ) : (
-          <button className="btn btn--primary" onClick={connect} disabled={status === 'connecting'}>
-            {status === 'connecting' ? 'Connecting…' : 'Connect Lace'}
-          </button>
-        )}
-      </div>
-      {status === 'error' && error && <p className="wallet-bar__error">{error}</p>}
+    <div className={`wallet-chip wallet-chip--${status}`}>
+      <span className="wallet-dot" data-state={status} aria-hidden="true" />
+      {connected && unshieldedAddress ? (
+        <code className="wallet-chip__address" title={unshieldedAddress}>
+          {unshieldedAddress.slice(0, 8)}…{unshieldedAddress.slice(-4)}
+        </code>
+      ) : (
+        <span className="wallet-chip__label">{STATUS_LABEL[status]}</span>
+      )}
+      {connected ? (
+        <button className="btn btn--ghost btn--small" onClick={disconnect}>
+          Disconnect
+        </button>
+      ) : (
+        <button className="btn btn--primary btn--small" onClick={connect} disabled={status === 'connecting'}>
+          {status === 'connecting' ? '…' : STATUS_LABEL[error ? 'error' : status]}
+        </button>
+      )}
+      {status === 'error' && error && <p className="wallet-chip__error">{error}</p>}
     </div>
   );
 }

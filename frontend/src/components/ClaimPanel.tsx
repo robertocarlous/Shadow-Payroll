@@ -96,15 +96,15 @@ export function ClaimPanel() {
       </div>
 
       <ol className="claim-steps">
-        <li>Make sure your wallet above says <strong>Connected</strong>.</li>
+        <li>Make sure the top-right wallet chip says <strong>Connected</strong>.</li>
         <li>Get your credential file (issued to you by the employer for this cohort).</li>
         <li>Drop it below and press <strong>Claim payout</strong>.</li>
       </ol>
 
       {walletStatus !== 'connected' ? (
         <p className="claim-panel__hint">
-          Connect a wallet in the bar above to claim. Stuck? Work through the{' '}
-          <a href="#onboarding">checklist</a>.
+          Connect your wallet with the <strong>Connect Lace</strong> button at the top right. Stuck?
+          Work through the <a href="#onboarding">checklist</a>.
         </p>
       ) : (
         <>
