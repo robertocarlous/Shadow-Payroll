@@ -225,7 +225,7 @@ Then:
 ```bash
 npm install
 npm run compile          # compiles contracts/payroll.compact -> contracts/managed/payroll
-npm test                 # runs the contract simulator test suite (11 tests)
+npm test                 # runs the contract simulator test suite (24 tests)
 ```
 
 ### Local devnet quickstart
@@ -332,12 +332,14 @@ both claimed, zero console errors).*
 npm test
 ```
 
-11 tests against a contract simulator (no network/proof server needed):
-initial state, funding, a valid claim, full reconciliation, double-claim
-rejection (nullifier reuse), tampered-amount rejection (breaks the Merkle
-path), non-member rejection, claim-before-funding rejection,
-double-funding rejection, and the solvency guard rejecting an over-budget
-claim.
+24 tests against a contract simulator (no network/proof server needed):
+initial state, allowlist-credential root verification, funding, a valid
+claim, full reconciliation, double-claim rejection (nullifier reuse),
+tampered-amount rejection (breaks the Merkle path), non-member rejection,
+claim-before-funding rejection, double-funding rejection, the solvency guard
+rejecting an over-budget claim, claim-expiration logic (before/after the
+deadline), and employer-side payee removal (remove, removed-payee rejection,
+non-employer rejection, post-claim no-op, multi-removal).
 
 The full flow (deploy → fund → two claims → reconciled → rejected
 double-claim) has also been verified against a real local devnet with real
