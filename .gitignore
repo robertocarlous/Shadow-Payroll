@@ -17,6 +17,8 @@ contracts/managed/
 credentials/
 *.credential.json
 .payroll/
+.payroll-fresh/
+.payroll-fresh-v2/
 
 # Exception: the "Try it yourself" judge-testable demo payroll is
 # deliberately public (a disposable testnet payroll, not a real one) --

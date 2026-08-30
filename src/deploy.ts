@@ -81,7 +81,7 @@ const Payroll = await import(pathToFileURL(contractPath).href);
 // Deploying only runs the constructor (no circuit call), so no payee
 // credential is needed here -- fundPayroll/claim happen later via the CLI.
 const compiledContract = CompiledContract.make('payroll', Payroll.Contract).pipe(
-  CompiledContract.withWitnesses(makeWitnesses(null) as any),
+  CompiledContract.withWitnesses(makeWitnesses(null) as never),
   CompiledContract.withCompiledFileAssets(zkConfigPath),
 );
 

@@ -31,7 +31,7 @@ if (!rootHex || budget === 0n) {
 
 function makeCompiledContract() {
   return CompiledContract.make('payroll', Payroll.Contract).pipe(
-    CompiledContract.withWitnesses(makeWitnesses(null) as any),
+    CompiledContract.withWitnesses(makeWitnesses(null) as never),
     CompiledContract.withCompiledFileAssets(zkConfigPath),
   );
 }

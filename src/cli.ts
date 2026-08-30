@@ -58,7 +58,7 @@ function loadCredential(filePath: string): PayeeCredential {
 
 function makeCompiledContract(credential: PayeeCredential | null) {
   return CompiledContract.make('payroll', Payroll.Contract).pipe(
-    CompiledContract.withWitnesses(makeWitnesses(credential) as any),
+    CompiledContract.withWitnesses(makeWitnesses(credential) as never),
     CompiledContract.withCompiledFileAssets(zkConfigPath),
   );
 }

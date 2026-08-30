@@ -4,13 +4,13 @@
   "type": "module",
   "private": true,
   "description": "Privacy-preserving payroll and revenue-split dApp on Midnight",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
     "compile": "compact compile contracts/payroll.compact contracts/managed/payroll",
-    "build": "npx tsc --noEmit || true",
+    "build": "npx tsc --noEmit",
     "test": "vitest run",
     "setup": "npx tsx src/setup.ts",
     "deploy": "npx tsx src/deploy.ts",
