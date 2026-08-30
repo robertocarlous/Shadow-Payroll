@@ -1,6 +1,6 @@
 # 🌒 Shadow Payroll
 
-**Private payroll and revenue splits on [Midnight](https://midnight.network).**
+**Private payroll and revenue splits on [Midnight](https://midnight.network) — transparency without revealing who earns what.**
 
 [![CI](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml/badge.svg)](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml)
 
@@ -13,6 +13,103 @@
 - **Level 5 submission map:** [docs/LEVEL5.md](docs/LEVEL5.md)
 - **Demo video:** https://www.loom.com/share/eb48ddadfac6462393968868a784c57f
   (see the recording checklist in [docs/LEVEL5.md](docs/LEVEL5.md))
+
+## What it does
+
+A DAO, remote team, or contractor network can pay people on-chain without
+leaking every salary to the public. Employers commit a **private payee
+allowlist** as a single Merkle root; each payee proves they're on it with a
+**local zero-knowledge proof** and claims exactly their own allocation —
+nobody else learns who is on the list, which entry is theirs, or what anyone
+else was paid.
+
+1. **Employer funds** — commits `{payee → amount}` as one Merkle root
+   (up to 256 payees in this MVP) plus a declared total budget.
+2. **Payee claims** — generates a ZK proof proving three things at once:
+   - membership in the allowlist (Merkle path, without revealing *which* leaf)
+   - never claimed before (a nullifier derived from their secret, so they
+     can't re-derive a second claim — double claims are rejected on-chain)
+   - the payroll stays solvent (`totalClaimed + amount <= totalBudget`)
+   - plus optional **claim expiration** (deadline timestamp) and
+     employer-side **payee removal** (revoke a payee's allocation before
+     they claim)
+3. **Anyone audits** — a public running total and a live dashboard show
+   deposited / claimed / reconciled in real time, without individual amounts.
+
+## Privacy model — what's actually hidden
+
+| Hidden | Visible |
+|---|---|
+| Who is on the allowlist at all (only a Merkle root is public) | The Merkle root commitment |
+| Which allowlist entry a given claim transaction belongs to (nullifier is derived only from the payee's secret, unlinkable to identity) | That *some* claim happened, and its amount, as a delta on the public running total at that moment |
+| Every payee's amount, to every other payee | The total budget and the running total claimed |
+
+In short: **the amount claimed in a given transaction is visible as a number,
+but who it belongs to is not** (unlinkability, not amount-hiding). Fully
+hiding individual amounts even from the public running total would need
+homomorphic commitments and ZK range/sum proofs — a substantially bigger
+lift, and out of scope for this MVP. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full reasoning and the
+nullifier/Merkle scheme.
+
+Also out of scope for this MVP: real token custody. `totalBudget` /
+`totalClaimed` are contract-tracked numeric commitments enforced by the
+solvency assert in `claim`, not live native-coin transfers via Zswap. That
+keeps the focus on the ZK/privacy logic, which is the point of this
+milestone.
+
+## The problem
+
+When a DAO, remote team, or contractor network pays people on a public
+blockchain, every salary and split becomes visible to anyone — competitors,
+coworkers, the public. Teams that want on-chain transparency and auditability
+end up sacrificing personal financial privacy to get it.
+
+## Tech stack
+
+- **Smart contract:** [Compact](https://docs.midnight.network)
+  (`contracts/payroll.compact`) — Merkle root, nullifier, expiration, and
+  payee-removal ZK circuits
+- **Backend:** TypeScript (`src/`) — off-chain Merkle allowlist builder,
+  deploy/setup pipeline, interactive employer & payee CLI, wallet
+  integration, and a contract-simulator test suite
+- **Frontend:** React + Vite dashboard (`frontend/`) — read-only audit stats
+  plus a wallet-connected claim flow (Lace wallet + local proof-server)
+- **Infra:** Docker local devnet (node + indexer + proof-server), GitHub
+  Actions CI
+
+## Architecture
+
+```
+shadow-payroll/
+├── contracts/payroll.compact   # the Compact smart contract
+├── src/
+│   ├── allowlist.ts            # off-chain Merkle tree builder (employer-side)
+│   ├── allowlist-cli.ts        # `npm run build-allowlist` entry point
+│   ├── witnesses.ts            # private witness wiring for claim()
+│   ├── network.ts              # network config (undeployed/preview/preprod)
+│   ├── wallet.ts / wallet-state.ts
+│   ├── deploy.ts / setup.ts    # deploy pipeline
+│   ├── cli.ts                  # interactive employer/payee CLI
+│   ├── check-balance.ts
+│   └── test/                   # contract simulator + vitest suite
+├── frontend/                   # React + Vite public audit dashboard (read-only)
+├── docker-compose.yml          # local devnet: node + indexer + proof-server
+└── .github/workflows/ci.yml
+```
+
+The contract logic:
+
+- `fundPayroll(root, budget)` — employer sets the allowlist root and budget
+  once.
+- `claim()` — payee proves membership (Merkle path over a depth-8 tree, i.e.
+  up to 256 payees per payroll in this MVP), proves they haven't claimed
+  before (nullifier derived from their secret, independent of amount), and
+  the contract asserts `totalClaimed + amount <= totalBudget` before
+  updating the running total.
+- `removePayee(secret, empSecret)` — employer-only, lets the employer revoke
+  a payee before they claim (proved via an employer nullifier).
+- `isReconciled()` — `true` once `totalClaimed == totalBudget`.
 
 ## Level 5 — Full Moon
 
@@ -104,87 +201,6 @@ this is a disposable testnet demo payroll, not a real one. A real
 deployment's credential files are bearer secrets and must never be
 committed (see [Usage](#usage) below); `.payroll/` (the directory the real
 allowlist-builder writes to) is gitignored for exactly that reason.
-
-## The problem
-
-When a DAO, remote team, or contractor network pays people on a public
-blockchain, every salary and split becomes visible to anyone — competitors,
-coworkers, the public. Teams that want on-chain transparency and auditability
-end up sacrificing personal financial privacy to get it.
-
-## The idea
-
-Shadow Payroll solves this with Midnight's selective disclosure and
-zero-knowledge proofs:
-
-1. An employer commits a **private allowlist** of `{payee, amount}` as a
-   single Merkle root, and declares a total budget.
-2. Each payee's actual allocation is known **only to them** — never
-   transmitted to the network, the employer, or other payees.
-3. To get paid, a payee generates a **local zero-knowledge proof** showing:
-   they're a member of the allowlist, their claim hasn't been made before,
-   and the claim keeps the payroll solvent — all without revealing which
-   allowlist entry is theirs.
-4. The contract verifies the proof and updates a **public running total**,
-   so anyone can confirm the payroll was fully and correctly distributed
-   without ever seeing individual amounts.
-5. A public **audit dashboard** shows deposited / claimed / reconciled in
-   real time.
-
-## Privacy model — what's actually hidden
-
-Being precise about this rather than oversimplifying it:
-
-| Hidden | Visible |
-|---|---|
-| Who is on the allowlist at all (only a Merkle root is public) | The Merkle root commitment |
-| Which allowlist entry a given claim transaction belongs to (nullifier is derived only from the payee's secret, unlinkable to identity) | That *some* claim happened, and its amount, as a delta on the public running total at that moment |
-| Every payee's amount, to every other payee | The total budget and the running total claimed |
-
-In short: **the amount claimed in a given transaction is visible as a number,
-but who it belongs to is not** (unlinkability, not amount-hiding). Fully
-hiding individual amounts even from the public running total would need
-homomorphic commitments and ZK range/sum proofs — a substantially bigger
-lift, and out of scope for this MVP. See
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full reasoning and the
-nullifier/Merkle scheme.
-
-Also out of scope for this MVP: real token custody. `totalBudget` /
-`totalClaimed` are contract-tracked numeric commitments enforced by the
-solvency assert in `claim`, not live native-coin transfers via Zswap. That
-keeps the focus on the ZK/privacy logic, which is the point of this
-milestone.
-
-## Architecture
-
-```
-shadow-payroll/
-├── contracts/payroll.compact   # the Compact smart contract
-├── src/
-│   ├── allowlist.ts            # off-chain Merkle tree builder (employer-side)
-│   ├── allowlist-cli.ts        # `npm run build-allowlist` entry point
-│   ├── witnesses.ts            # private witness wiring for claim()
-│   ├── network.ts              # network config (undeployed/preview/preprod)
-│   ├── wallet.ts / wallet-state.ts
-│   ├── deploy.ts / setup.ts    # deploy pipeline
-│   ├── cli.ts                  # interactive employer/payee CLI
-│   ├── check-balance.ts
-│   └── test/                   # contract simulator + vitest suite
-├── frontend/                   # React + Vite public audit dashboard (read-only)
-├── docker-compose.yml          # local devnet: node + indexer + proof-server
-└── .github/workflows/ci.yml
-```
-
-The contract logic:
-
-- `fundPayroll(root, budget)` — employer sets the allowlist root and budget
-  once.
-- `claim()` — payee proves membership (Merkle path over a depth-8 tree, i.e.
-  up to 256 payees per payroll in this MVP), proves they haven't claimed
-  before (nullifier derived from their secret, independent of amount), and
-  the contract asserts `totalClaimed + amount <= totalBudget` before
-  updating the running total.
-- `isReconciled()` — `true` once `totalClaimed == totalBudget`.
 
 ## Setup
 
