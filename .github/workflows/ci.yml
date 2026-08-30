@@ -24,8 +24,12 @@ jobs:
             https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
-      - name: Fetch Compact compiler
-        run: compact update
+      # Pin the compiler: contracts/payroll.compact declares
+      # `pragma language_version 0.23`, which toolchain 0.31.1 provides.
+      # `compact update` (no version) tracks the latest toolchain, whose
+      # language version has since moved past 0.23 and would fail to compile.
+      - name: Fetch Compact compiler (pinned to language version 0.23)
+        run: compact update 0.31.1
 
       - name: Install dependencies
         run: npm ci

@@ -210,8 +210,15 @@ allowlist-builder writes to) is gitignored for exactly that reason.
 ```bash
 curl --proto '=https' --tlsv1.2 -LsSf \
   https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
-compact update
+compact update 0.31.1
 ```
+
+> **Pin `compact update 0.31.1`** — `contracts/payroll.compact` declares
+> `pragma language_version 0.23`, and toolchain 0.31.1 is the compiler that
+> provides it (on both Intel/Apple Silicon macOS and Linux). A bare
+> `compact update` tracks the latest toolchain, whose language version has
+> since moved past 0.23 and will reject the pragma with
+> `language version mismatch`.
 
 Then:
 
