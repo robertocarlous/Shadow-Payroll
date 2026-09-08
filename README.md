@@ -1,332 +1,159 @@
-# 🌒 Shadow Payroll
+# 🌕 Shadow Payroll
 
 **Private payroll and revenue splits on [Midnight](https://midnight.network) — transparency without revealing who earns what.**
 
 [![CI](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml/badge.svg)](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml)
 
-- **Live audit dashboard (try it yourself):** https://shadow-payroll.vercel.app
-  — a wallet-connected "Claim a payout" button, not just numbers. See
-  [Try it yourself](#try-it-yourself) below.
-- **Contract address (live dashboard, Preview):** `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0`
-- **Contract address (judge-testable instance, Preview):** `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369`
-- **Contract address (first completed run, Preview):** `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee`
-- **Level 5 submission map:** [docs/LEVEL5.md](docs/LEVEL5.md)
-- **Demo video:** https://www.loom.com/share/eb48ddadfac6462393968868a784c57f
-  (see the recording checklist in [docs/LEVEL5.md](docs/LEVEL5.md))
+> Privacy-preserving payouts, public proof. An employer commits a private
+> payee allowlist as one Merkle root; every payee claims their allocation
+> with a local zero-knowledge proof — nobody learns who is on the list,
+> which entry is theirs, or what anyone else was paid.
 
-## What it does
+## Live Demo
+
+**https://shadow-payroll.vercel.app**
+
+A wallet-connected audit dashboard with a real "Claim a payout" flow
+(runs the proof locally, submits through Lace, watches the on-chain running
+total move). See [docs/USAGE.md](docs/USAGE.md) for the step-by-step guide.
+
+## Contract Address
+
+| Network  | Address |
+|----------|---------|
+| **Preview** (*live dashboard*) | `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0` |
+| Preview (*judge-testable*)     | `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369` |
+| Preview (*first completed run*) | `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee` |
+
+> **Which network?** Preprod was unavailable during the Level 6 cycle
+> (confirmed Midnight indexer/DUST failures, documented below), so the product
+> runs on Midnight **Preview** — the identical code path.
+> <br/>**Update me when you redeploy:** replace the top Preview address with the
+> new address printed by `npm run setup -- --network preview`, then sync
+> `frontend/.env` + `frontend/.env.production` (`VITE_CONTRACT_ADDRESS`).
+
+## What This Product Does
 
 A DAO, remote team, or contractor network can pay people on-chain without
 leaking every salary to the public. Employers commit a **private payee
-allowlist** as a single Merkle root; each payee proves they're on it with a
-**local zero-knowledge proof** and claims exactly their own allocation —
-nobody else learns who is on the list, which entry is theirs, or what anyone
-else was paid.
-
-1. **Employer funds** — commits `{payee → amount}` as one Merkle root
-   (up to 256 payees in this MVP) plus a declared total budget.
-2. **Payee claims** — generates a ZK proof proving three things at once:
-   - membership in the allowlist (Merkle path, without revealing *which* leaf)
-   - never claimed before (a nullifier derived from their secret, so they
-     can't re-derive a second claim — double claims are rejected on-chain)
-   - the payroll stays solvent (`totalClaimed + amount <= totalBudget`)
-   - plus optional **claim expiration** (deadline timestamp) and
-     employer-side **payee removal** (revoke a payee's allocation before
-     they claim)
-3. **Anyone audits** — a public running total and a live dashboard show
-   deposited / claimed / reconciled in real time, without individual amounts.
-
-## Privacy model — what's actually hidden
-
-| Hidden | Visible |
-|---|---|
-| Who is on the allowlist at all (only a Merkle root is public) | The Merkle root commitment |
-| Which allowlist entry a given claim transaction belongs to (nullifier is derived only from the payee's secret, unlinkable to identity) | That *some* claim happened, and its amount, as a delta on the public running total at that moment |
-| Every payee's amount, to every other payee | The total budget and the running total claimed |
-
-In short: **the amount claimed in a given transaction is visible as a number,
-but who it belongs to is not** (unlinkability, not amount-hiding). Fully
-hiding individual amounts even from the public running total would need
-homomorphic commitments and ZK range/sum proofs — a substantially bigger
-lift, and out of scope for this MVP. See
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full reasoning and the
-nullifier/Merkle scheme.
-
-Also out of scope for this MVP: real token custody. `totalBudget` /
-`totalClaimed` are contract-tracked numeric commitments enforced by the
-solvency assert in `claim`, not live native-coin transfers via Zswap. That
-keeps the focus on the ZK/privacy logic, which is the point of this
-milestone.
-
-## The problem
+allowlist** as a single Merkle root; each payee **proves they're on it with a
+local zero-knowledge proof** and claims exactly their own allocation. Nobody
+else learns who is on the list, which entry is theirs, or what anyone else
+was paid — while the on-chain running total still proves the payroll
+reconciled to the last tNight.
 
 When a DAO, remote team, or contractor network pays people on a public
 blockchain, every salary and split becomes visible to anyone — competitors,
 coworkers, the public. Teams that want on-chain transparency and auditability
-end up sacrificing personal financial privacy to get it.
+end up sacrificing personal financial privacy to get it. Shadow Payroll
+reverses that trade: **the payroll is fully auditable on-chain, but the
+amounts themselves are private.** A Merkle root (one 32-byte hash) commits
+the entire `{payee → amount}` list; claims reveal only a nullifier and a
+delta on the public running total.
 
-## Tech stack
+Midnight is the right home for this because it natively compiles
+zero-knowledge proofs that run locally in the browser: the claiming side of
+the privacy guarantee — proving membership in the allowlist *without
+revealing which leaf* — is enforced by the smart contract, not by trusting a
+server.
+
+## Privacy Model
+
+- **PUBLIC:** the single allowlist Merkle root, the declared total budget,
+  and the running claimed total (so anyone can audit that the payroll
+  reconciled). Each claim also publicly shows that *a* claim happened.
+- **PRIVATE:** the whole payee list (who's eligible, and for how much), and
+  which allowlist entry a given claim belongs to.
+- **What the user PROVES without revealing:** that they are a member of the
+  allowlist (Merkle path), that they haven't claimed before (nullifier
+  derived from their secret), and that the payroll stays solvent — all in one
+  zero-knowledge proof, without revealing *which* leaf or who they are.
+
+In short: the amount claimed in a given transaction is visible as a number,
+but **who** it belongs to is not (unlinkability). Fully hiding the amounts
+from the public running total would need homomorphic commitments + ZK
+range/sum proofs — a bigger lift explicitly out of scope for this MVP. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Tech Stack
 
 - **Smart contract:** [Compact](https://docs.midnight.network)
-  (`contracts/payroll.compact`) — Merkle root, nullifier, expiration, and
-  payee-removal ZK circuits
+  (`contracts/payroll.compact`) — Merkle root, nullifier, claim-expiration,
+  and payee-removal ZK circuits
 - **Backend:** TypeScript (`src/`) — off-chain Merkle allowlist builder,
   deploy/setup pipeline, interactive employer & payee CLI, wallet
-  integration, and a contract-simulator test suite
+  integration, contract-simulator test suite
 - **Frontend:** React + Vite dashboard (`frontend/`) — read-only audit stats
-  plus a wallet-connected claim flow (Lace wallet + local proof-server)
+  plus a wallet-connected claim flow (Lace wallet + local proof-server),
+  credential preview before claiming
 - **Infra:** Docker local devnet (node + indexer + proof-server), GitHub
   Actions CI
 
-## Architecture
+## Prerequisites
 
-```
-shadow-payroll/
-├── contracts/payroll.compact   # the Compact smart contract
-├── src/
-│   ├── allowlist.ts            # off-chain Merkle tree builder (employer-side)
-│   ├── allowlist-cli.ts        # `npm run build-allowlist` entry point
-│   ├── witnesses.ts            # private witness wiring for claim()
-│   ├── network.ts              # network config (undeployed/preview/preprod)
-│   ├── wallet.ts / wallet-state.ts
-│   ├── deploy.ts / setup.ts    # deploy pipeline
-│   ├── cli.ts                  # interactive employer/payee CLI
-│   ├── check-balance.ts
-│   └── test/                   # contract simulator + vitest suite
-├── frontend/                   # React + Vite public audit dashboard (read-only)
-├── docker-compose.yml          # local devnet: node + indexer + proof-server
-└── .github/workflows/ci.yml
-```
+- **Node.js 22+** and npm
+- **Docker Desktop** (for the local proof-server / devnet)
+- **[Lace wallet](https://www.lace.io/)** connected to the **Preview**
+  network, with a little tNight/DUST from the
+  [Preview faucet](https://midnight-tmnight-preview.nethermind.dev)
+- **[Compact toolchain](https://docs.midnight.network)** (pinned to
+  `0.31.1`, see below)
 
-The contract logic:
-
-- `fundPayroll(root, budget)` — employer sets the allowlist root and budget
-  once.
-- `claim()` — payee proves membership (Merkle path over a depth-8 tree, i.e.
-  up to 256 payees per payroll in this MVP), proves they haven't claimed
-  before (nullifier derived from their secret, independent of amount), and
-  the contract asserts `totalClaimed + amount <= totalBudget` before
-  updating the running total.
-- `removePayee(secret, empSecret)` — employer-only, lets the employer revoke
-  a payee before they claim (proved via an employer nullifier).
-- `isReconciled()` — `true` once `totalClaimed == totalBudget`.
-
-## Level 5 — Full Moon
-
-This cycle turned the MVP into something real users can meet: a **50-payee
-Preview cohort** (one payout credential per payee, committing a private leaf
-to a single allowlist root — see [docs/level5/](docs/level5/)), a **guided
-dashboard** (checklist, how-it-works, FAQ, community stats),
-and a **documented feedback loop**
-([docs/FEEDBACK-LOOP.md](docs/FEEDBACK-LOOP.md)) with a public changelog
-([docs/level5/FEEDBACK.md](docs/level5/FEEDBACK.md)).
-
-- **50 user wallet addresses:** [USERS.md](USERS.md) — verifiable on-chain
-  via bulk registration TX `00404c6c…1ec293` (block 415485)
-
-The cohort's payout credentials are committed under `docs/level5/`. The
-[judge-testable](docs/level5/root.json) allowlist root is what gets funded
-on-chain to bring the cohort live; see
-[docs/level5/README.md](docs/level5/README.md) for the two-command deploy.
-
-## Public network deployment status
-
-Live on Midnight **Preview**: contract deployed, payroll funded (budget
-350), two payees claimed their private allocations, and the running total
-reconciled — all with real transactions and real ZK proofs, visible on the
-[live dashboard](https://shadow-payroll.vercel.app):
-
-![Live dashboard showing a fully reconciled payroll on Preview](docs/screenshots/audit-dashboard-preview-live.png)
-
-Getting there took two rounds of real infrastructure debugging worth being
-transparent about:
-
-- **Preprod** never worked: wallet sync against a fresh seed OOM'd 3
-  separate times across 2 days regardless of Node heap size (default, 8GB
-  twice) — consistent failure around the ~10-minute mark points to
-  unbounded memory growth in the wallet SDK's sync path against Preprod
-  specifically. This matches a previously-documented, team-confirmed
-  Midnight indexer/wallet-sync issue hit in this author's earlier Level 2
-  submission (a separate project, `midnight-newmoon`). **Preprod was
-  abandoned in favor of Preview**, which the mission brief also treats as
-  an acceptable documented substitution when Preprod itself is the blocker.
-- **Preview's faucet** was down for about a day
-  (`{"status":"NOT_SERVING","reason":"SYNC_STUCK_RECOVERY","needsRestart":true}`
-  from its own health endpoint) — resolved on Midnight's end, then funded
-  successfully via the public faucet UI.
-- **DUST registration** then failed identically 4 times in a row with a
-  clean websocket disconnect (`1000: Normal Closure`) from the Preview RPC
-  node, right as `submitAndWatchExtrinsic` started watching for inclusion —
-  reproducible enough to be a real client/RPC interaction issue, not
-  random flakiness. Fixed by adding a small in-process retry loop around
-  that specific submission in `src/deploy.ts` (see the code comment there);
-  it succeeded on the 2nd internal attempt once added.
-
-The local-devnet deployment (compile → deploy → fund → claim →
-double-claim rejection → reconciliation, all with real ZK proofs) remains
-independently verified too — see
-[docs/screenshots/audit-dashboard.png](docs/screenshots/audit-dashboard.png).
-
-**A second, judge-testable instance** is now live too (contract address
-above) — funded with 4 small, deliberately-unclaimed allocations so a
-visitor can actually click "Claim" and watch the dashboard change, rather
-than just look at an already-finished number. See
-[Try it yourself](#try-it-yourself).
-
-## Try it yourself
-
-The dashboard has a real wallet-connected claim flow, not just read-only
-numbers. Lace doesn't yet support in-wallet proof generation (confirmed on
-the [Midnight forum](https://forum.midnight.network/t/lace-wallet-doesnt-implement-getprovingprovider-expected-behavior-or-version-gap/1213)),
-so proving happens against a local proof-server — same tradeoff this
-author's earlier `midnight-newmoon` project already worked through.
-
-**Prerequisites:**
-1. [Lace wallet](https://www.lace.io/) installed, connected to the **Preview** network, with a small amount of Preview tNight/DUST (get some from the [Preview faucet](https://midnight-tmnight-preview.nethermind.dev)).
-2. Docker running the proof-server locally: `git clone` this repo, `docker compose up -d proof-server`.
-
-**Steps:**
-1. Open https://shadow-payroll.vercel.app and click **Connect Lace**.
-2. Grab one of the four test credential files from
-   [docs/try-it-yourself/credentials/](docs/try-it-yourself/credentials/)
-   (`judge1.json` through `judge4.json` — each claims a different small
-   amount, 10/20/30/40, and can only be claimed once).
-3. Paste its contents (or upload the file) into the **Claim a payout** box
-   and click **Claim payout**.
-4. Watch "Total claimed" and "Claims made" update within a few seconds, and
-   "✅ Fully reconciled" appear once all four have been claimed.
-
-These credentials are **deliberately public** (committed to this repo) —
-this is a disposable testnet demo payroll, not a real one. A real
-deployment's credential files are bearer secrets and must never be
-committed (see [Usage](#usage) below); `.payroll/` (the directory the real
-allowlist-builder writes to) is gitignored for exactly that reason.
-
-## Setup
-
-**Prerequisites:** Node.js 22+, Docker Desktop, and the
-[Compact toolchain](https://docs.midnight.network):
+## Setup & Run Locally
 
 ```bash
 curl --proto '=https' --tlsv1.2 -LsSf \
   https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
-compact update 0.31.1
+compact update 0.31.1    # pinned — contracts/payroll.compact declares pragma language_version 0.23
 ```
-
-> **Pin `compact update 0.31.1`** — `contracts/payroll.compact` declares
-> `pragma language_version 0.23`, and toolchain 0.31.1 is the compiler that
-> provides it (on both Intel/Apple Silicon macOS and Linux). A bare
-> `compact update` tracks the latest toolchain, whose language version has
-> since moved past 0.23 and will reject the pragma with
-> `language version mismatch`.
-
-Then:
 
 ```bash
 npm install
 npm run compile          # compiles contracts/payroll.compact -> contracts/managed/payroll
-npm test                 # runs the contract simulator test suite (24 tests)
+npm test                 # contract simulator suite (24 tests)
 ```
 
-### Local devnet quickstart
+**Local devnet quickstart** (node + indexer + proof-server, deploys to the
+`undeployed` network):
 
 ```bash
-npm run setup             # docker compose up (node+indexer+proof-server), compile, deploy
+npm run setup
 ```
 
-This deploys to the `undeployed` (local) network using the well-known
-genesis seed. `npm run setup` is a shortcut for
-`docker compose up -d --wait ... && npm run compile && npm run deploy`.
-
-### Deploying to a public network
+**Deploy to a public network:**
 
 ```bash
-npm run setup -- --network preview   # or --network preprod
+npm run setup -- --network preview    # or --network preprod (when available)
 ```
 
-The first run generates a fresh wallet seed and saves it (along with the
-deployed contract address) to `.midnight-state.json` — **never commit this
-file**, it holds a private key (already gitignored). You'll be prompted to
-fund the wallet from that network's faucet if its balance is zero, and the
-script polls until funding lands before deploying. Wallet sync state is
-cached under `.midnight-wallet-state/` so retries don't re-sync from zero.
+The first run generates a fresh wallet seed and saves it (with the deployed
+contract address) to `.midnight-state.json` — **never commit this file**. You
+may be prompted to fund the wallet from the network faucet.
 
-> **Known Preprod risk:** Midnight's Preprod indexer has, at times,
-> fallen behind the live chain badly enough to break DUST fee validity for
-> every transaction (a team-confirmed infrastructure issue, not a
-> client-side bug). If `npm run setup -- --network preprod` hangs on DUST
-> registration for an extended period with no errors, that's almost
-> certainly this. There's no client-side workaround — retry later, or fall
-> back to `--network preview` (identical code path, different network) and
-> note the substitution, same as this project did for an earlier milestone.
-
-## Usage
-
-**Employer: build the allowlist and fund the payroll**
+**Run a payroll end to end:**
 
 ```bash
-npm run build-allowlist payroll-input.example.json
-# writes .payroll/root.json and .payroll/credentials/<payeeId>.json
-
-npm run cli
-# → 1. Fund payroll (employer), paste .payroll/root.json
+npm run build-allowlist payroll-input.example.json   # writes .payroll/root.json + credentials/
+npm run cli                                          # 1. Fund payroll → paste .payroll/root.json
+# give each payee their credentials/<id>.json; then, as a payee:
+npm run cli                                          # 2. Claim payout → paste your credential path
 ```
 
-The input file ([payroll-input.example.json](payroll-input.example.json)) is
-a plain array: `[{ "payeeId": "alice", "amount": 100 }]`.
-Distribute each `.payroll/credentials/<payeeId>.json` to its payee privately
-(e.g. encrypted email) — anyone holding that file can claim that payee's
-exact allocation, so treat it like a bearer credential. `.payroll/` is
-gitignored.
-
-**Payee: claim your payout**
-
-```bash
-npm run cli
-# → 2. Claim payout (payee), paste path to your credentials/<id>.json
-```
-
-**Anyone: check the public audit state**
-
-```bash
-npm run cli
-# → 3. View public audit state
-```
-
-or open the [frontend dashboard](frontend/) for the same thing, live, with
-no wallet needed to view.
-
-## Frontend dashboard
+**Frontend dashboard:**
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env   # set VITE_NETWORK and VITE_CONTRACT_ADDRESS
+cp .env.example .env    # VITE_NETWORK=preview, VITE_CONTRACT_ADDRESS=<address>
 npm run build && npm run preview
 ```
 
-The public audit stats (deposited / claimed / reconciled) are read-only and
-poll the indexer directly — no wallet needed to view them. The **Claim a
-payout** panel below them is the interactive part: connect Lace, paste a
-credential, submit a real transaction (see
-[Try it yourself](#try-it-yourself)). Deployed to Vercel from this repo;
-see the live link at the top of this README.
+> **Dev-mode note:** `npm run dev` currently hits a Vite + wasm-bindgen
+> ordering issue from `@midnight-ntwrk/onchain-runtime-v3`. The production
+> path (`build && preview`, and the Vercel deployment) is unaffected — use
+> that for local testing.
 
-![Audit dashboard showing a fully reconciled payroll](docs/screenshots/audit-dashboard.png)
-
-*Verified live against a real local devnet deployment (2 payees, budget 350,
-both claimed, zero console errors).*
-
-> **Dev-mode note:** `npm run dev` currently hits a `vite`-dev-server +
-> wasm-bindgen module-init ordering issue
-> (`Cannot access '__wbindgen_start' before initialization`) coming from
-> `@midnight-ntwrk/onchain-runtime-v3`'s WASM glue under Vite's on-demand
-> ESM serving. The production path (`npm run build && npm run preview`,
-> and the actual Vercel deployment) is unaffected — verified with zero
-> console errors against a live local devnet. Use `build && preview` for
-> local testing until this is tracked upstream.
-
-## Testing
+## Run Tests
 
 ```bash
 npm test
@@ -335,21 +162,71 @@ npm test
 24 tests against a contract simulator (no network/proof server needed):
 initial state, allowlist-credential root verification, funding, a valid
 claim, full reconciliation, double-claim rejection (nullifier reuse),
-tampered-amount rejection (breaks the Merkle path), non-member rejection,
-claim-before-funding rejection, double-funding rejection, the solvency guard
-rejecting an over-budget claim, claim-expiration logic (before/after the
-deadline), and employer-side payee removal (remove, removed-payee rejection,
-non-employer rejection, post-claim no-op, multi-removal).
+tampered-amount rejection, non-member rejection, claim-before-funding,
+double-funding rejection, the solvency guard over-budget rejection,
+claim-expiration (before/after deadline), and employer-side payee removal.
 
-The full flow (deploy → fund → two claims → reconciled → rejected
-double-claim) has also been verified against a real local devnet with real
-ZK proofs, not just the simulator.
+The full flow has also been verified against a real local devnet with real
+ZK proofs (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs on every push/PR to `main`:
-compiles the contract (TS bindings + ZK circuits), runs the test suite, and
-builds both the root package and the frontend dashboard.
+`.github/workflows/ci.yml` runs on every push/PR to `main`: installs the
+pinned Compact toolchain, compiles the contract (TS bindings + ZK circuits),
+runs the full test suite, typechecks, and builds both the root package and
+the frontend dashboard.
+
+## Usage Guide
+
+See [docs/USAGE.md](docs/USAGE.md) — a plain-English "Getting Started on
+Preview" + "Your First Transaction" walkthrough for non-technical users.
+
+## Feedback & Iterations
+
+The feedback loop is **open**: report bugs or suggestions via GitHub issues.
+Every entry gets a `new → triaged → shipped` lifecycle in the weekly triage.
+
+- **[docs/FEEDBACK-LOOP.md](docs/FEEDBACK-LOOP.md)** — how the loop works
+- **[docs/FEEDBACK.md](docs/FEEDBACK.md)** — Level 6 changelog
+- **[docs/level5/FEEDBACK.md](docs/level5/FEEDBACK.md)** — Level 5 changelog
+
+Top changes made from user feedback:
+
+- **First-run guide** — onboarding checklist + FAQ on the dashboard so new
+  users know exactly what to do first (L5 Feedback #1)
+- **A feedback channel you can actually find** — GitHub-issue loop with a
+  public changelog (L5 Feedback #2)
+- **Credential preview before claiming** — paste your credential and the
+  dashboard tells you which payee + how much *before* submitting, so an
+  ambiguous "claim failed" is far less likely (L6)
+- **A self-service user guide** — `docs/USAGE.md` consolidates setup and
+  claiming into one plain-English walkthrough (L6)
+
+## Level 6 Users
+
+See [LAUNCH_USERS.md](LAUNCH_USERS.md) — the 20-user Supermoon launch cohort
+tracker (wallet addresses fill in as users onboard). The 50-user Level 5
+cohort is in [USERS.md](USERS.md).
+
+## Community & Submission Maps
+
+- Level 5 submission map: [docs/LEVEL5.md](docs/LEVEL5.md)
+- Level 6 submission map: [docs/LEVEL6.md](docs/LEVEL6.md)
+
+## Public network deployment status
+
+Live on Midnight **Preview**: contract deployed, payroll funded (budget 350),
+two payees claimed their private allocations, and the running total
+reconciled — all with real transactions and real ZK proofs.
+
+![Live dashboard showing a fully reconciled payroll on Preview](docs/screenshots/audit-dashboard-preview-live.png)
+
+**Known infra issues (why Preprod isn't the network here):** Preprod's
+indexer/wallet-sync path has failed repeatedly across this project's history
+(OOM crashes and indexer fall-behind that broke DUST fee validity — a
+team-confirmed Midnight issue, not a client bug). Preview was used as the
+documented identical-code-path substitution. See
+[docs/LEVEL5.md](docs/LEVEL5.md) for the full history.
 
 ## License
 

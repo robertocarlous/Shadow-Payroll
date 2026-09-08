@@ -4,7 +4,7 @@ export function Hero() {
   return (
     <section className="hero">
       <div className="hero__chips" aria-hidden="true">
-        <span className="chip">🌙 Level 5 · Full Moon</span>
+        <span className="chip">🌕 Level 6 · Supermoon</span>
         <span className="chip chip--violet">Zero-knowledge proofs</span>
         <span className="chip chip--teal">{ACTIVE_NETWORK} testnet</span>
       </div>
@@ -31,10 +31,11 @@ export function Hero() {
         <span>🌓</span>
         <span>🌔</span>
         <span className="is-lit">🌕</span>
+        <span className="is-lit">🌖</span>
       </div>
       <p className="hero__network">
-        Live on <strong>{ACTIVE_NETWORK}</strong> · 50 invited Preview users · watch the moon fill as
-        claims land
+        Live on <strong>{ACTIVE_NETWORK}</strong> · 20 new Preview users onboarding · watch the moon
+        fill as claims land
       </p>
     </section>
   );

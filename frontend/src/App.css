@@ -1433,6 +1433,23 @@ body {
   font-size: 14px;
 }
 
+.banner--warn {
+  background: rgba(255, 200, 87, 0.08);
+  border-color: rgba(255, 200, 87, 0.35);
+  color: var(--status-warn, #f5c96b);
+}
+
+.banner--info {
+  background: rgba(116, 154, 255, 0.08);
+  border-color: rgba(116, 154, 255, 0.35);
+  color: var(--status-info, #b8c7ff);
+}
+
+.banner--info span,
+.banner--warn p {
+  font-size: 14px;
+}
+
 /* ---------- Footer ---------- */
 
 .footer {

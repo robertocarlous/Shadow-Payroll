@@ -1,8 +1,8 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { useWallet } from '../context/WalletContext';
 import { submitClaim, type ClaimRetryInfo } from '../midnight/contractClient';
-import { parseCredential } from '../midnight/witnesses';
+import { parseCredential, type PayeeCredential } from '../midnight/witnesses';
 import { describeError } from '../midnight/errors';
 import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from '../network';
 
@@ -16,6 +16,20 @@ export function ClaimPanel() {
   const [claimError, setClaimError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Preview the credential before submission: if the pasted JSON parses into
+  // a valid credential, tell the user which payee and how much (their own
+  // amount) so an ambiguous "claim failed" is far less likely. Already the
+  // biggest source of confusion in the Level 5 cohort.
+  const parsedCredential: PayeeCredential | Error | null = useMemo(() => {
+    const trimmed = credentialText.trim();
+    if (!trimmed) return null;
+    try {
+      return parseCredential(trimmed);
+    } catch (err) {
+      return err instanceof Error ? err : new Error(String(err));
+    }
+  }, [credentialText]);
 
   const onFileChosen = useCallback((file: File | undefined) => {
     if (!file) return;
@@ -166,6 +180,24 @@ export function ClaimPanel() {
               Generates a zero-knowledge proof locally, then submits through your wallet.
             </span>
           </div>
+
+          {parsedCredential instanceof Error && credentialText.trim() !== '' && (
+            <div className="banner banner--warn">
+              <strong>Credential check</strong>
+              <p>{parsedCredential.message}</p>
+            </div>
+          )}
+          {parsedCredential && !(parsedCredential instanceof Error) && !submitting && (
+            <div className="banner banner--info">
+              <strong>Credential ready</strong>
+              <span>
+                Claiming for <strong>{parsedCredential.payeeId}</strong> — amount{' '}
+                <strong>{parsedCredential.amount.toString()}</strong> tNight on{' '}
+                {ACTIVE_NETWORK}. Your amount is never posted in public ledger state; only the
+                running total delta moves.
+              </span>
+            </div>
+          )}
         </>
       )}
 
