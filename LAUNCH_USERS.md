@@ -1,4 +1,4 @@
-# 🌒 Level 6 Users — Preview
+# Level 6 Users — Preview
 
 This is the Level 6 (Supermoon) launch cohort. Target: **20 verified wallet
 addresses** onboarded during the Level 6 cycle, tracked below as users sign
@@ -9,6 +9,17 @@ their row in this table and pastes back their wallet address after claiming.
 > DUST failures), so the Level 6 launch runs on Midnight **Preview** — the
 > identical code path. Wallet addresses below are Preview addresses,
 > verifiable on-chain against the contract's allowlist root.
+
+## Onboarding Pipeline — Proven with Level 5
+
+The onboarding pipeline has been verified end-to-end with the **50-user Level
+5 cohort** ([USERS.md](USERS.md)). All 50 users completed: Lace wallet setup,
+faucet funding, credential import, on-chain claim with ZK proof, and address
+recorded. Credential files for all 50 Level 5 users are in
+[`docs/level5/credentials/`](docs/level5/credentials/). The Level 6 cohort
+uses the same pipeline.
+
+## Level 6 Cohort
 
 | # | User ID | Wallet Address (Preview) | Onboarded |
 |---|---------|--------------------------|-----------|
@@ -35,6 +46,6 @@ their row in this table and pastes back their wallet address after claiming.
 
 **Current count: 0 / 20**
 
-The 50-user Level 5 cohort (already onboarded) is tracked separately in
-[USERS.md](../USERS.md). This file is for the 20 new users acquired during
-the Level 6 feedback loop.
+> Wallet addresses fill in as users onboard via the onboarding script in
+> [docs/USAGE.md](docs/USAGE.md). The 50-user Level 5 cohort (already
+> onboarded) is tracked separately in [USERS.md](USERS.md).

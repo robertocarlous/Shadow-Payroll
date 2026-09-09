@@ -3,6 +3,7 @@
 **Private payroll and revenue splits on [Midnight](https://midnight.network) — transparency without revealing who earns what.**
 
 [![CI](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml/badge.svg)](https://github.com/robertocarlous/Shadow-Payroll/actions/workflows/ci.yml)
+[![X (formerly Twitter)](https://img.shields.io/badge/Follow-%40shadowpayr-1DA1F2?logo=x&logoColor=white)](https://x.com/shadowpayr)
 
 > Privacy-preserving payouts, public proof. An employer commits a private
 > payee allowlist as one Merkle root; every payee claims their allocation
@@ -19,18 +20,19 @@ total move). See [docs/USAGE.md](docs/USAGE.md) for the step-by-step guide.
 
 ## Contract Address
 
-| Network  | Address |
-|----------|---------|
-| **Preview** (*live dashboard*) | `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0` |
-| Preview (*judge-testable*)     | `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369` |
-| Preview (*first completed run*) | `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee` |
+| Network | Address | Status |
+|---------|---------|--------|
+| **Preprod** | *Target network — deploy pending Preprod indexer availability* | pending |
+| **Preview** (live dashboard) | `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0` | live |
+| Preview (judge-testable) | `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369` | live |
+| Preview (first completed run) | `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee` | live |
 
-> **Which network?** Preprod was unavailable during the Level 6 cycle
-> (confirmed Midnight indexer/DUST failures, documented below), so the product
-> runs on Midnight **Preview** — the identical code path.
-> <br/>**Update me when you redeploy:** replace the top Preview address with the
-> new address printed by `npm run setup -- --network preview`, then sync
-> `frontend/.env` + `frontend/.env.production` (`VITE_CONTRACT_ADDRESS`).
+> **Network note:** Preprod's indexer/wallet-sync path has failed repeatedly
+> across this project's history (OOM crashes and indexer fall-behind that broke
+> DUST fee validity — a confirmed Midnight infrastructure issue). The contract
+> code is identical across networks; Preview is the verified working deployment.
+> Preprod deployment is queued for when infrastructure stabilises — run
+> `npm run setup -- --network preprod` to deploy.
 
 ## What This Product Does
 
@@ -213,7 +215,7 @@ cohort is in [USERS.md](USERS.md).
 - Level 5 submission map: [docs/LEVEL5.md](docs/LEVEL5.md)
 - Level 6 submission map: [docs/LEVEL6.md](docs/LEVEL6.md)
 
-## Public network deployment status
+## Public Network Deployment Status
 
 Live on Midnight **Preview**: contract deployed, payroll funded (budget 350),
 two payees claimed their private allocations, and the running total
@@ -221,12 +223,19 @@ reconciled — all with real transactions and real ZK proofs.
 
 ![Live dashboard showing a fully reconciled payroll on Preview](docs/screenshots/audit-dashboard-preview-live.png)
 
-**Known infra issues (why Preprod isn't the network here):** Preprod's
-indexer/wallet-sync path has failed repeatedly across this project's history
-(OOM crashes and indexer fall-behind that broke DUST fee validity — a
-team-confirmed Midnight issue, not a client bug). Preview was used as the
-documented identical-code-path substitution. See
+**Preprod status:** Preprod's indexer/wallet-sync path has failed repeatedly
+across this project's history (OOM crashes and indexer fall-behind that broke
+DUST fee validity — a confirmed Midnight infrastructure issue, not a client
+bug). Preview was used as the documented identical-code-path substitution.
+Preprod deployment is queued for when infrastructure stabilises. See
 [docs/LEVEL5.md](docs/LEVEL5.md) for the full history.
+
+## Brand & Social
+
+- **X / Twitter:** [@shadowpayr](https://x.com/shadowpayr)
+- **Tagline:** Private payouts, public proof.
+- **Brand brief:** [docs/BRAND-BRIEF.md](docs/BRAND-BRIEF.md) — colour palette, key messages, banner concept
+- **Dashboard screenshots:** [docs/screenshots/](docs/screenshots/)
 
 ## License
 
