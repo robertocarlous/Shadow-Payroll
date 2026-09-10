@@ -1,10 +1,41 @@
 import { ACTIVE_NETWORK } from '../network';
+import { Logo } from './Logo';
+
+const MOON_SIZE = 22;
+
+function MoonGlyph({ phase, lit }: { phase: number; lit?: boolean }) {
+  return (
+    <svg
+      width={MOON_SIZE}
+      height={MOON_SIZE}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`moon-glyph ${lit ? 'is-lit' : ''}`}
+    >
+      <defs>
+        <linearGradient id={`moon-fill-${phase}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ffe9a8" />
+          <stop offset="50%" stopColor="#f2c94c" />
+          <stop offset="100%" stopColor="#e8a13a" />
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="10" fill={`url(#moon-fill-${phase})`} fillOpacity={lit ? 1 : 0.85} />
+      {phase < 1 && (
+        <path d="M14 2a10 10 0 0 0 0 20c1.5-2 2.2-5.5 2.2-10S15.5 4 14 2z" fill="#0b0820" fillOpacity={lit ? 0.2 : 0.85} />
+      )}
+      {phase < 0.5 && phase >= 0.25 && <circle cx="12" cy="12" r="10" fill="none" stroke="#0b0820" strokeOpacity="0.2" strokeWidth="0.5" />}
+      {phase === 1 && <circle cx="12" cy="12" r="4" fill="#0b0820" fillOpacity="0.08" />}
+    </svg>
+  );
+}
 
 export function Hero() {
   return (
     <section className="hero">
       <div className="hero__chips" aria-hidden="true">
-        <span className="chip">🌕 Level 6 · Supermoon</span>
+        <span className="chip">
+          <Logo size={15} animated={false} /> Level 6 · Supermoon
+        </span>
         <span className="chip chip--violet">Zero-knowledge proofs</span>
         <span className="chip chip--teal">{ACTIVE_NETWORK} testnet</span>
       </div>
@@ -25,17 +56,17 @@ export function Hero() {
           How it works
         </a>
       </div>
-      <div className="hero__phase-strip" aria-hidden="true">
-        <span>🌑</span>
-        <span>🌒</span>
-        <span>🌓</span>
-        <span>🌔</span>
-        <span className="is-lit">🌕</span>
-        <span className="is-lit">🌖</span>
+      <div className="hero__moon-strip" aria-hidden="true">
+        <MoonGlyph phase={0} />
+        <MoonGlyph phase={0.25} />
+        <MoonGlyph phase={0.5} />
+        <MoonGlyph phase={0.75} />
+        <MoonGlyph phase={1} lit />
+        <span className="hero__moon-strip__label">watch the moon fill as claims land</span>
       </div>
       <p className="hero__network">
-        Live on <strong>{ACTIVE_NETWORK}</strong> · 20 new Preview users onboarding · watch the moon
-        fill as claims land
+        Live on <strong>{ACTIVE_NETWORK}</strong> · 20 new Preview users onboarding · claim with a
+        zero-knowledge proof, see the payroll reconcile publicly
       </p>
     </section>
   );

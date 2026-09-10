@@ -10,6 +10,8 @@ import { HowItWorks } from './components/HowItWorks';
 import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { ClaimPanel } from './components/ClaimPanel';
 import { Faq } from './components/Faq';
+import { Logo } from './components/Logo';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
 const STAR_COUNT = 80;
@@ -70,15 +72,14 @@ export default function App() {
   const claimsMade = state.status === 'ready' ? Number(state.state.claimsMade) : 0;
 
   return (
-    <WalletProvider>
-      <div className="page">
+    <ErrorBoundary>
+      <WalletProvider>
+        <div className="page">
         <Stars />
 
         <header className="header">
           <a className="header__brand" href="#top">
-            <span className="header__logo" aria-hidden="true">
-              🌕
-            </span>
+            <Logo size={24} className="header__logo-svg" />
             <span className="header__name">Shadow Payroll</span>
           </a>
           <nav className="header__nav" aria-label="Page sections">
@@ -126,7 +127,8 @@ export default function App() {
             This view only proves the running total was fully and correctly distributed.
           </p>
         </footer>
-      </div>
-    </WalletProvider>
+        </div>
+      </WalletProvider>
+    </ErrorBoundary>
   );
 }

@@ -2,12 +2,35 @@ import { useRef } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 
 const PHASES = [
-  { emoji: '🌑', label: 'New moon — awaiting the first claim' },
-  { emoji: '🌒', label: 'Waxing crescent — claims are starting' },
-  { emoji: '🌓', label: 'First quarter — halfway there' },
-  { emoji: '🌔', label: 'Waxing gibbous — most of the payroll is out' },
-  { emoji: '🌕', label: 'Full moon — fully reconciled' },
+  { svgPhase: 0, label: 'New moon — awaiting the first claim' },
+  { svgPhase: 0.25, label: 'Waxing crescent — claims are starting' },
+  { svgPhase: 0.5, label: 'First quarter — halfway there' },
+  { svgPhase: 0.75, label: 'Waxing gibbous — most of the payroll is out' },
+  { svgPhase: 1, label: 'Full moon — fully reconciled' },
 ];
+
+function PhaseGlyph({ phase }: { phase: number }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <linearGradient id="phase-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ffe9a8" />
+          <stop offset="50%" stopColor="#f2c94c" />
+          <stop offset="100%" stopColor="#e8a13a" />
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="10" fill="url(#phase-grad)" />
+      {phase < 1 && (
+        <path
+          d="M14 2a10 10 0 0 0 0 20c1.5-2 2.2-5.5 2.2-10S15.5 4 14 2z"
+          fill="#0b0820"
+          fillOpacity={phase === 0 ? 1 : 0.8}
+        />
+      )}
+      {phase === 1 && <circle cx="12" cy="12" r="3.5" fill="#0b0820" fillOpacity="0.08" />}
+    </svg>
+  );
+}
 
 function phaseFor(pct: number): (typeof PHASES)[number] {
   if (pct >= 100) return PHASES[4];
@@ -58,8 +81,8 @@ export function MoonPhase({
         </div>
 
         <div className="moonviz__readout">
-          <span className="moonviz__phase-emoji" aria-hidden="true">
-            {phase.emoji}
+          <span className="moonviz__phase-glyph">
+            <PhaseGlyph phase={phase.svgPhase} />
           </span>
           <span className="moonviz__pct">
             <AnimatedNumber value={pct} />%

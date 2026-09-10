@@ -116,10 +116,20 @@ export function ClaimPanel() {
       </ol>
 
       {walletStatus !== 'connected' ? (
-        <p className="claim-panel__hint">
-          Connect your wallet with the <strong>Connect Lace</strong> button at the top right. Stuck?
-          Work through the <a href="#onboarding">checklist</a>.
-        </p>
+        <div className="claim-gate">
+          <div className="claim-gate__icon" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="11" width="18" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="12" cy="16" r="2" fill="currentColor" />
+            </svg>
+          </div>
+          <p className="claim-gate__title">Connect your wallet to claim</p>
+          <p className="claim-gate__sub">
+            Use the <strong>Connect wallet</strong> button in the top-right corner. Stuck? Work
+            through the <a href="#onboarding">checklist</a>.
+          </p>
+        </div>
       ) : (
         <>
           <div
