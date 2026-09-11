@@ -15,8 +15,8 @@ function MoonGlyph({ phase, lit }: { phase: number; lit?: boolean }) {
       <defs>
         <linearGradient id={`moon-fill-${phase}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#ffe9a8" />
-          <stop offset="50%" stopColor="#f2c94c" />
-          <stop offset="100%" stopColor="#e8a13a" />
+          <stop offset="50%" stopColor="#f0c356" />
+          <stop offset="100%" stopColor="#cf8f2c" />
         </linearGradient>
       </defs>
       <circle cx="12" cy="12" r="10" fill={`url(#moon-fill-${phase})`} fillOpacity={lit ? 1 : 0.85} />
@@ -32,28 +32,37 @@ function MoonGlyph({ phase, lit }: { phase: number; lit?: boolean }) {
 export function Hero() {
   return (
     <section className="hero">
+      <div className="hero__emblem" aria-hidden="true">
+        <Logo size={100} />
+      </div>
       <div className="hero__chips" aria-hidden="true">
         <span className="chip">
-          <Logo size={15} animated={false} /> Level 6 · Supermoon
+          <span className="chip__dot" /> Proof-of-privacy payroll
         </span>
-        <span className="chip chip--violet">Zero-knowledge proofs</span>
-        <span className="chip chip--teal">{ACTIVE_NETWORK} testnet</span>
+        <span className="chip chip--violet">
+          <span className="chip__dot" /> Zero-knowledge claims
+        </span>
+        <span className="chip chip--teal">
+          <span className="chip__dot" /> Live · {ACTIVE_NETWORK}
+        </span>
       </div>
       <h1 className="hero__title">
-        Shadow Payroll
-        <span className="hero__title-sub">private payouts, public proof</span>
+        Private payouts.
+        <br />
+        <span className="hero__title-accent">Public proof.</span>
       </h1>
       <p className="hero__lead">
         A privacy-preserving payroll where every payee&apos;s amount stays secret — and everyone can
-        watch the money add up correctly. Claim with a zero-knowledge proof; the dashboard proves the
-        whole payroll reconciled without ever revealing who got what.
+        watch the money add up correctly. Claim with a{' '}
+        <strong>zero-knowledge proof</strong>; the dashboard proves the whole payroll reconciled
+        without ever revealing who got what.
       </p>
       <div className="hero__actions">
         <a className="btn btn--primary btn--lg" href="#claim">
           Claim my payout
         </a>
         <a className="btn btn--ghost btn--lg" href="#how-it-works">
-          How it works
+          See how it works
         </a>
       </div>
       <div className="hero__moon-strip" aria-hidden="true">
@@ -65,8 +74,8 @@ export function Hero() {
         <span className="hero__moon-strip__label">watch the moon fill as claims land</span>
       </div>
       <p className="hero__network">
-        Live on <strong>{ACTIVE_NETWORK}</strong> · 20 new Preview users onboarding · claim with a
-        zero-knowledge proof, see the payroll reconcile publicly
+        20 new Preview users onboarding · claim with a zero-knowledge proof, watch the payroll
+        reconcile on-chain
       </p>
     </section>
   );

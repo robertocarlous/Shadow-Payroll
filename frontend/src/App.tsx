@@ -111,7 +111,12 @@ export default function App() {
         </main>
 
         <footer className="footer">
-          <p>
+          <div className="footer__brand">
+            <Logo size={22} animated={false} />
+            <span className="footer__name">Shadow Payroll</span>
+          </div>
+          <p className="footer__tagline">Private payouts, public proof.</p>
+          <p className="footer__meta">
             Network: <strong>{ACTIVE_NETWORK}</strong>
             {CONTRACT_ADDRESS && (
               <>
@@ -122,7 +127,7 @@ export default function App() {
               </>
             )}
           </p>
-          <p className="muted">
+          <p className="footer__note">
             Individual payee amounts are never shown here — only they are, by design.
             This view only proves the running total was fully and correctly distributed.
           </p>

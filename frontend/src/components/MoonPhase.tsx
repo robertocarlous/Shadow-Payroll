@@ -62,6 +62,13 @@ export function MoonPhase({
     <div className={`moonviz ${reconciled ? 'is-full' : ''} ${initialized ? '' : 'is-waiting'}`}>
       <div className="moonviz__stage">
         <svg className="moonviz__ring" viewBox="0 0 240 240" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringArcGrad" x1="0" y1="1" x2="1" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#7c6cf0" />
+              <stop offset="55%" stopColor="#f0c356" />
+              <stop offset="100%" stopColor="#2dd4bf" />
+            </linearGradient>
+          </defs>
           <circle className="moonviz__ring-track" cx="120" cy="120" r={R} />
           <circle
             className="moonviz__ring-arc"
