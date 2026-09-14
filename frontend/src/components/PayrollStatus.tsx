@@ -18,7 +18,7 @@ function Skeleton() {
   return (
     <section className="card" id="status">
       <div className="section-heading">
-        <h2>Payroll status</h2>
+        <h2><span className="section-heading__num">01</span>Payroll status</h2>
       </div>
       <div className="status-grid">
         <div className="skeleton skeleton--moonviz" />
@@ -45,7 +45,7 @@ export function PayrollStatus({ state }: { state: LoadState }) {
     return (
       <section className="card reveal" ref={ref} id="status">
         <div className="section-heading">
-          <h2>Payroll status</h2>
+          <h2><span className="section-heading__num">01</span>Payroll status</h2>
         </div>
         <div className="error-box">
           <span className="status-badge critical">Not connected</span>
@@ -64,7 +64,7 @@ export function PayrollStatus({ state }: { state: LoadState }) {
       {reconciled && initialized && <Celebration />}
       <section className={`card status-card reveal ${reconciled ? 'is-reconciled' : ''}`} ref={ref} id="status">
         <div className="section-heading">
-          <h2>Payroll status</h2>
+          <h2><span className="section-heading__num">01</span>Payroll status</h2>
           <span className="muted last-updated">Live · updated {state.lastUpdated.toLocaleTimeString()}</span>
         </div>
 

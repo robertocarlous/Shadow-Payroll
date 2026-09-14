@@ -5,9 +5,9 @@ interface LogoProps {
 }
 
 /**
- * Shadow Payroll mark v2: refined geometry with a deep-space badge,
- * golden crescent moon, violet proof-shield with teal check, and a
- * luminous gradient ring. Cleaner than v1 with better contrast at small sizes.
+ * Shadow Payroll mark: a deep-space badge where a golden crescent moon
+ * (the private "shadow") is locked with a violet proof-shield and teal check
+ * (the public proof) inside a gradient ring.
  */
 export function Logo({ size = 28, className = '', animated = true }: LogoProps) {
   return (
@@ -23,9 +23,9 @@ export function Logo({ size = 28, className = '', animated = true }: LogoProps) 
     >
       <defs>
         <radialGradient id="sp-bg" cx="0.38" cy="0.28" r="1.15" gradientUnits="objectBoundingBox">
-          <stop offset="0%" stopColor="#1e1650" />
+          <stop offset="0%" stopColor="#201758" />
           <stop offset="45%" stopColor="#110d2e" />
-          <stop offset="100%" stopColor="#08061a" />
+          <stop offset="100%" stopColor="#07051a" />
         </radialGradient>
         <linearGradient id="sp-ring" x1="8" y1="4" x2="58" y2="62" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#ffe9a8" />
@@ -33,23 +33,23 @@ export function Logo({ size = 28, className = '', animated = true }: LogoProps) 
           <stop offset="65%" stopColor="#9a7ad6" />
           <stop offset="100%" stopColor="#7c6cf0" />
         </linearGradient>
-        <linearGradient id="sp-gold" x1="16" y1="14" x2="52" y2="54" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fff4d6" />
-          <stop offset="30%" stopColor="#f5d06b" />
-          <stop offset="65%" stopColor="#e8a830" />
+        <linearGradient id="sp-gold" x1="16" y1="12" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fff6dc" />
+          <stop offset="28%" stopColor="#f5d06b" />
+          <stop offset="62%" stopColor="#e8a830" />
           <stop offset="100%" stopColor="#c48520" />
         </linearGradient>
         <linearGradient id="sp-shield" x1="30" y1="20" x2="42" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#b8a8ff" />
-          <stop offset="50%" stopColor="#8b78e8" />
-          <stop offset="100%" stopColor="#5b4bd6" />
+          <stop offset="0%" stopColor="#b9a9ff" />
+          <stop offset="55%" stopColor="#8b78e8" />
+          <stop offset="100%" stopColor="#5545c9" />
         </linearGradient>
         <linearGradient id="sp-check" x1="33" y1="25" x2="39" y2="31" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#a0f5e8" />
           <stop offset="100%" stopColor="#2dd4bf" />
         </linearGradient>
-        <filter id="sp-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="1.8" result="blur" />
+        <filter id="sp-glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="1.4" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -63,35 +63,27 @@ export function Logo({ size = 28, className = '', animated = true }: LogoProps) 
         </clipPath>
         <mask id="sp-crescent">
           <rect width="64" height="64" fill="white" />
-          <circle cx="38" cy="26" r="16" fill="black" />
+          <circle cx="37.5" cy="25" r="16.5" fill="black" />
         </mask>
       </defs>
 
       {/* Badge background */}
       <g clipPath="url(#sp-clip)">
         <circle cx="32" cy="32" r="30" fill="url(#sp-bg)" />
-        {/* Subtle top highlight */}
-        <ellipse cx="32" cy="8" rx="22" ry="10" fill="#ffffff" opacity="0.04" />
-        {/* Warm ambient glow at bottom */}
-        <circle cx="32" cy="42" r="24" fill="url(#sp-gold)" opacity="0.06" filter="url(#sp-soft)" />
+        <ellipse cx="32" cy="7" rx="22" ry="10.5" fill="#ffffff" opacity="0.045" />
+        <circle cx="32" cy="44" r="23" fill="url(#sp-gold)" opacity="0.07" filter="url(#sp-soft)" />
       </g>
 
       {/* Golden crescent moon */}
-      <circle
-        cx="30"
-        cy="33"
-        r="20"
-        fill="url(#sp-gold)"
-        mask="url(#sp-crescent)"
-        filter="url(#sp-soft)"
-      />
-      <circle
-        cx="30"
-        cy="33"
-        r="20"
-        fill="url(#sp-gold)"
-        mask="url(#sp-crescent)"
-      />
+      <g filter="url(#sp-glow)">
+        <circle
+          cx="30.5"
+          cy="32"
+          r="19.5"
+          fill="url(#sp-gold)"
+          mask="url(#sp-crescent)"
+        />
+      </g>
 
       {/* Violet proof-shield */}
       <path
@@ -101,9 +93,9 @@ export function Logo({ size = 28, className = '', animated = true }: LogoProps) 
         strokeWidth="0.7"
       />
 
-      {/* Teal check mark */}
+      {/* Teal check */}
       <path
-        d="M34 25.5 l1.8 1.8 3.2 -3.8"
+        d="M34 25.6 l1.8 1.8 3.2 -3.8"
         stroke="url(#sp-check)"
         strokeWidth="2"
         strokeLinecap="round"
@@ -111,18 +103,16 @@ export function Logo({ size = 28, className = '', animated = true }: LogoProps) 
         fill="none"
       />
 
-      {/* Sparkle accent */}
+      {/* Sparkle */}
       <g opacity="0.9">
-        <path d="M47 13 v3.2 M45.4 14.6 h3.2" stroke="#ffe9a8" strokeWidth="1.2" strokeLinecap="round" />
-        <circle cx="47" cy="14.6" r="0.6" fill="#ffe9a8" opacity="0.6" />
+        <path d="M47.2 13.4 v3 M45.7 14.9 h3" stroke="#ffe9a8" strokeWidth="1.2" strokeLinecap="round" />
+        <circle cx="47.2" cy="14.9" r="0.6" fill="#ffe9a8" opacity="0.6" />
       </g>
 
-      {/* Outer ring */}
+      {/* Rings */}
       <circle cx="32" cy="32" r="29.8" stroke="url(#sp-ring)" strokeWidth="1.8" />
-      {/* Inner subtle ring */}
       <circle cx="32" cy="32" r="27.5" stroke="rgba(255,255,255,0.04)" strokeWidth="0.8" />
 
-      {/* Animated pulse ring */}
       {animated && (
         <>
           <style>{`
@@ -148,5 +138,26 @@ export function Logo({ size = 28, className = '', animated = true }: LogoProps) 
         </>
       )}
     </svg>
+  );
+}
+
+/**
+ * Full brand lockup: the mark + a distinctive two-tone logotype.
+ * "SHADOW" reads in moon-silver, "PAYROLL" in violet, with a hairline
+ * divider — the "shadow" over the "proof" of the payroll.
+ */
+export function BrandLockup({ size = 24, animated = true }: { size?: number; animated?: boolean }) {
+  return (
+    <span className="brand-lockup">
+      <Logo size={size} animated={animated} />
+      <span className="brand-lockup__wordmark">
+        <span className="brand-lockup__name">
+          <span className="brand-lockup__shadow">Shadow</span>
+          <span className="brand-lockup__divider" aria-hidden="true" />
+          <span className="brand-lockup__payroll">Payroll</span>
+        </span>
+        <span className="brand-lockup__tag">Private payouts · public proof</span>
+      </span>
+    </span>
   );
 }

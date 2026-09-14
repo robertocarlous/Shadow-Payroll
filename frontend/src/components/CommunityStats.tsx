@@ -13,7 +13,7 @@ export function CommunityStats({ claimsMade }: { claimsMade: number }) {
   return (
     <section className="card reveal" ref={ref} id="community">
       <div className="section-heading">
-        <h2>The cohort, at a glance</h2>
+        <h2><span className="section-heading__num">02</span>The cohort, at a glance</h2>
         <span className="muted">{COHORT.name}</span>
       </div>
 

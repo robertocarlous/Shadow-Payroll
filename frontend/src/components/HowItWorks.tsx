@@ -51,7 +51,7 @@ export function HowItWorks() {
   return (
     <section className="card reveal" ref={ref} id="how-it-works">
       <div className="section-heading">
-        <h2>How it works</h2>
+        <h2><span className="section-heading__num">03</span>How it works</h2>
         <span className="muted">Privacy for individuals, proof for everyone</span>
       </div>
       <ol className="steps">

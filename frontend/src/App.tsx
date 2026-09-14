@@ -10,7 +10,7 @@ import { HowItWorks } from './components/HowItWorks';
 import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { ClaimPanel } from './components/ClaimPanel';
 import { Faq } from './components/Faq';
-import { Logo } from './components/Logo';
+import { Logo, BrandLockup } from './components/Logo';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
@@ -92,7 +92,11 @@ export default function App() {
         <header className="header">
           <a className="header__brand" href="#top">
             <Logo size={24} className="header__logo-svg" />
-            <span className="header__name">Shadow Payroll</span>
+            <span className="header__name">
+              <span className="header__name-shadow">Shadow</span>
+              <span className="header__name-divider" aria-hidden="true" />
+              <span className="header__name-payroll">Payroll</span>
+            </span>
           </a>
           <nav className="header__nav" aria-label="Page sections">
             {NAV_LINKS.map(([href, label]) => (
@@ -131,7 +135,7 @@ export default function App() {
         )}
 
         <main className="layout" id="top">
-          <Hero />
+          <Hero state={state} claimsMade={claimsMade} />
 
           <PayrollStatus state={state} />
           <CommunityStats claimsMade={claimsMade} />
@@ -147,10 +151,9 @@ export default function App() {
 
         <footer className="footer">
           <div className="footer__top">
-            <div className="footer__brand">
-              <Logo size={22} animated={false} />
-              <span className="footer__name">Shadow Payroll</span>
-            </div>
+<div className="footer__brand">
+            <BrandLockup size={20} animated={false} />
+          </div>
             <div className="footer__links">
               <a href="https://github.com" target="_blank" rel="noreferrer" className="footer__link" aria-label="GitHub">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
@@ -160,7 +163,6 @@ export default function App() {
               </a>
             </div>
           </div>
-          <p className="footer__tagline">Private payouts, public proof.</p>
           <div className="footer__meta-row">
             <span className="footer__meta-item">
               Network: <strong>{ACTIVE_NETWORK}</strong>
