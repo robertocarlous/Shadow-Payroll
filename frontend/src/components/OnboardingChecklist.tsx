@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PROOF_SERVER_URL } from '../network';
+import { useReveal } from '../useReveal';
 
 const STEPS = [
   {
@@ -49,7 +50,11 @@ function CheckRow({ step, done, onToggle }: { step: (typeof STEPS)[number]; done
         aria-pressed={done}
         aria-label={`${done ? 'Mark as not done' : 'Mark as done'}: ${step.title}`}
       >
-        {done ? '✓' : ''}
+        {done && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+        )}
       </button>
       <div className="check-row__body">
         <h3>{step.title}</h3>
@@ -78,6 +83,7 @@ export function OnboardingChecklist() {
       return {};
     }
   });
+  const ref = useReveal();
 
   useEffect(() => {
     try {
@@ -90,7 +96,7 @@ export function OnboardingChecklist() {
   const completed = STEPS.filter((s) => done[s.id]).length;
 
   return (
-    <section className="card" id="onboarding">
+    <section className="card reveal" ref={ref} id="onboarding">
       <div className="section-heading">
         <h2>Your first payout, step by step</h2>
         <span className="muted">

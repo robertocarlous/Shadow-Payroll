@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useReveal } from '../useReveal';
 
 const FAQS = [
   {
@@ -29,9 +30,10 @@ const FAQS = [
 
 export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
+  const ref = useReveal();
 
   return (
-    <section className="card" id="faq">
+    <section className="card reveal" ref={ref} id="faq">
       <div className="section-heading">
         <h2>Frequently asked questions</h2>
         <span className="muted">Quick answers for your first claim</span>
@@ -41,10 +43,13 @@ export function Faq() {
           const isOpen = open === i;
           return (
             <div className={`faq-item ${isOpen ? 'is-open' : ''}`} key={item.q}>
-              <button type="button" className="faq-item__q" onClick={() => setOpen(isOpen ? null : i)}>
+              <button type="button" className="faq-item__q" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen}>
                 <span>{item.q}</span>
                 <span className="faq-item__chevron" aria-hidden="true">
-                  {isOpen ? '–' : '+'}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M12 5v14M5 12h14" className="faq-item__plus-v" />
+                    <path d="M5 12h14" className="faq-item__plus-h" />
+                  </svg>
                 </span>
               </button>
               {isOpen && <p className="faq-item__a">{item.a}</p>}

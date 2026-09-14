@@ -1,6 +1,7 @@
 import type { LoadState } from '../usePayrollState';
 import { AnimatedNumber } from './AnimatedNumber';
 import { Celebration, MoonPhase } from './MoonPhase';
+import { useReveal } from '../useReveal';
 
 function StatTile({ label, value }: { label: string; value: number }) {
   return (
@@ -36,11 +37,13 @@ function Skeleton() {
 }
 
 export function PayrollStatus({ state }: { state: LoadState }) {
+  const ref = useReveal();
+
   if (state.status === 'loading') return <Skeleton />;
 
   if (state.status === 'error') {
     return (
-      <section className="card" id="status">
+      <section className="card reveal" ref={ref} id="status">
         <div className="section-heading">
           <h2>Payroll status</h2>
         </div>
@@ -59,7 +62,7 @@ export function PayrollStatus({ state }: { state: LoadState }) {
   return (
     <>
       {reconciled && initialized && <Celebration />}
-      <section className={`card status-card ${reconciled ? 'is-reconciled' : ''}`} id="status">
+      <section className={`card status-card reveal ${reconciled ? 'is-reconciled' : ''}`} ref={ref} id="status">
         <div className="section-heading">
           <h2>Payroll status</h2>
           <span className="muted last-updated">Live · updated {state.lastUpdated.toLocaleTimeString()}</span>

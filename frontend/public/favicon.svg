@@ -1,40 +1,55 @@
 <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="b" cx="0.36" cy="0.3" r="1.1" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#191440"/>
-      <stop offset="52%" stop-color="#0d0b24"/>
-      <stop offset="100%" stop-color="#070514"/>
+    <radialGradient id="sp-bg" cx="0.38" cy="0.28" r="1.15" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#1e1650"/>
+      <stop offset="45%" stop-color="#110d2e"/>
+      <stop offset="100%" stop-color="#08061a"/>
     </radialGradient>
-    <linearGradient id="r" x1="12" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+    <linearGradient id="sp-ring" x1="8" y1="4" x2="58" y2="62" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#ffe9a8"/>
-      <stop offset="48%" stop-color="#c49a52"/>
+      <stop offset="35%" stop-color="#d4a84a"/>
+      <stop offset="65%" stop-color="#9a7ad6"/>
       <stop offset="100%" stop-color="#7c6cf0"/>
     </linearGradient>
-    <linearGradient id="g" x1="20" y1="18" x2="50" y2="50" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fff0c2"/>
-      <stop offset="48%" stop-color="#f0c356"/>
-      <stop offset="100%" stop-color="#cf8f2c"/>
+    <linearGradient id="sp-gold" x1="16" y1="14" x2="52" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff4d6"/>
+      <stop offset="30%" stop-color="#f5d06b"/>
+      <stop offset="65%" stop-color="#e8a830"/>
+      <stop offset="100%" stop-color="#c48520"/>
     </linearGradient>
-    <linearGradient id="s" x1="32" y1="24" x2="40.5" y2="33" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#a89bff"/>
+    <linearGradient id="sp-shield" x1="30" y1="20" x2="42" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#b8a8ff"/>
+      <stop offset="50%" stop-color="#8b78e8"/>
       <stop offset="100%" stop-color="#5b4bd6"/>
     </linearGradient>
-    <linearGradient id="c" x1="34" y1="26" x2="38" y2="30" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#8cf2e2"/>
+    <linearGradient id="sp-check" x1="33" y1="25" x2="39" y2="31" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a0f5e8"/>
       <stop offset="100%" stop-color="#2dd4bf"/>
     </linearGradient>
-    <clipPath id="cp"><circle cx="32" cy="32" r="29.4"/></clipPath>
-    <mask id="cm">
+    <filter id="sp-soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+    <clipPath id="sp-clip">
+      <circle cx="32" cy="32" r="29.5"/>
+    </clipPath>
+    <mask id="sp-crescent">
       <rect width="64" height="64" fill="white"/>
-      <circle cx="37" cy="27.5" r="15" fill="black"/>
+      <circle cx="38" cy="26" r="16" fill="black"/>
     </mask>
   </defs>
-  <g clip-path="url(#cp)">
-    <circle cx="32" cy="32" r="30" fill="url(#b)"/>
-    <ellipse cx="30" cy="10" rx="21" ry="11" fill="#ffffff" opacity="0.05"/>
+  <g clip-path="url(#sp-clip)">
+    <circle cx="32" cy="32" r="30" fill="url(#sp-bg)"/>
+    <ellipse cx="32" cy="8" rx="22" ry="10" fill="#ffffff" opacity="0.04"/>
+    <circle cx="32" cy="42" r="24" fill="url(#sp-gold)" opacity="0.06" filter="url(#sp-soft)"/>
   </g>
-  <circle cx="30.5" cy="32" r="19.5" fill="url(#g)" mask="url(#cm)"/>
-  <path d="M36 23.2 l4.6 2.7 v4.5 c0 3.2 -2.2 5.6 -4.6 6.9 -2.4 -1.3 -4.6 -3.7 -4.6 -6.9 v-4.5 z" fill="url(#s)" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
-  <path d="M33.9 26.9 l1.6 1.6 2.9 -3.3" stroke="url(#c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <circle cx="32" cy="32" r="29.5" stroke="url(#r)" stroke-width="1.7"/>
+  <circle cx="30" cy="33" r="20" fill="url(#sp-gold)" mask="url(#sp-crescent)" filter="url(#sp-soft)"/>
+  <circle cx="30" cy="33" r="20" fill="url(#sp-gold)" mask="url(#sp-crescent)"/>
+  <path d="M36.5 21.5 l5.5 3.2 v5.8 c0 3.8 -2.6 6.5 -5.5 8 -2.9 -1.5 -5.5 -4.2 -5.5 -8 v-5.8 z" fill="url(#sp-shield)" stroke="rgba(255,255,255,0.22)" stroke-width="0.7"/>
+  <path d="M34 25.5 l1.8 1.8 3.2 -3.8" stroke="url(#sp-check)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <g opacity="0.9">
+    <path d="M47 13 v3.2 M45.4 14.6 h3.2" stroke="#ffe9a8" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="47" cy="14.6" r="0.6" fill="#ffe9a8" opacity="0.6"/>
+  </g>
+  <circle cx="32" cy="32" r="29.8" stroke="url(#sp-ring)" stroke-width="1.8"/>
+  <circle cx="32" cy="32" r="27.5" stroke="rgba(255,255,255,0.04)" stroke-width="0.8"/>
 </svg>

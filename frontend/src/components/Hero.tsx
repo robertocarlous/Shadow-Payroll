@@ -74,7 +74,7 @@ export function Hero() {
         <span className="hero__moon-strip__label">watch the moon fill as claims land</span>
       </div>
       <p className="hero__network">
-        20 new Preview users onboarding · claim with a zero-knowledge proof, watch the payroll
+        50-person Full Moon cohort onboarding · claim with a zero-knowledge proof, watch the payroll
         reconcile on-chain
       </p>
     </section>

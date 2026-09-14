@@ -5,8 +5,10 @@ import { submitClaim, type ClaimRetryInfo } from '../midnight/contractClient';
 import { parseCredential, type PayeeCredential } from '../midnight/witnesses';
 import { describeError } from '../midnight/errors';
 import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from '../network';
+import { useReveal } from '../useReveal';
 
 export function ClaimPanel() {
+  const ref = useReveal();
   const { status: walletStatus, api, reconnect } = useWallet();
   const [credentialText, setCredentialText] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -103,7 +105,7 @@ export function ClaimPanel() {
   }, [api, attemptClaim, isStaleWalletError, reconnect]);
 
   return (
-    <section className="card claim-panel" id="claim">
+    <section className="card claim-panel reveal" ref={ref} id="claim">
       <div className="section-heading">
         <h2>Claim your payout</h2>
         <span className="muted">Private in. Proof out. Amount never shown.</span>
@@ -147,7 +149,11 @@ export function ClaimPanel() {
             onClick={() => fileInput.current?.click()}
           >
             <span className="claim-dropzone__icon" aria-hidden="true">
-              ⬆
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 16V4"/>
+                <path d="M8 8l4-4 4 4"/>
+                <path d="M20 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2"/>
+              </svg>
             </span>
             <span className="claim-dropzone__main">Drop your credential file here</span>
             <span className="claim-dropzone__sub">

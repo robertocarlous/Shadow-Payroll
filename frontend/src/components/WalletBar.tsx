@@ -81,7 +81,7 @@ export function WalletBar() {
           <div className="wallet-modal__backdrop" onClick={() => setShowDetails(false)} />
           <div className="wallet-modal__panel">
             <button className="wallet-modal__close" onClick={() => setShowDetails(false)} aria-label="Close">
-              ✕
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
             <h2 className="wallet-modal__title">
               {connected ? 'Wallet connected' : 'Connect your wallet'}
@@ -108,7 +108,13 @@ export function WalletBar() {
               <div className="wallet-modal__body">
                 {!hasWallets ? (
                   <>
-                    <div className="wallet-modal__icon" aria-hidden="true">🦁</div>
+                    <div className="wallet-modal__icon" aria-hidden="true">
+                      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="6" width="20" height="14" rx="2"/>
+                        <path d="M2 10h20"/>
+                        <path d="M16 14h2"/>
+                      </svg>
+                    </div>
                     <p className="wallet-modal__lead">
                       No Midnight wallet detected. Claims are signed by the{' '}
                       <strong>Lace</strong> browser extension — no login, no password.
@@ -135,7 +141,13 @@ export function WalletBar() {
                   </>
                 ) : (
                   <>
-                    <div className="wallet-modal__icon" aria-hidden="true">🦁</div>
+                    <div className="wallet-modal__icon" aria-hidden="true">
+                      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="6" width="20" height="14" rx="2"/>
+                        <path d="M2 10h20"/>
+                        <path d="M16 14h2"/>
+                      </svg>
+                    </div>
                     <p className="wallet-modal__lead">
                       Found <strong>{availableWallets.length}</strong> wallet
                       {availableWallets.length === 1 ? '' : 's'} on this device. Click to connect —

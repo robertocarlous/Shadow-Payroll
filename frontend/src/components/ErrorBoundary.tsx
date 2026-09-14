@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               background: 'rgba(19,15,36,0.8)',
             }}
           >
-            <h1 style={{ margin: '0 0 12px', fontFamily: "'Space Grotesk', sans-serif', sans-serif", fontSize: 22 }}>
+            <h1 style={{ margin: '0 0 12px', fontFamily: "'Space Grotesk', sans-serif", fontSize: 22 }}>
               Something went wrong
             </h1>
             <p style={{ margin: '0 0 16px', color: '#bdb7d4', fontSize: 14, lineHeight: 1.6 }}>

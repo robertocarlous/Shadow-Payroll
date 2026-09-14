@@ -1,5 +1,6 @@
 import { COHORT } from '../config';
 import { AnimatedNumber } from './AnimatedNumber';
+import { useReveal } from '../useReveal';
 
 /**
  * Fifty anonymous slots — one per payee on the allowlist. Lit dots count
@@ -7,9 +8,10 @@ import { AnimatedNumber } from './AnimatedNumber';
  */
 export function CommunityStats({ claimsMade }: { claimsMade: number }) {
   const claimedPct = COHORT.size > 0 ? Math.round((claimsMade / COHORT.size) * 100) : 0;
+  const ref = useReveal();
 
   return (
-    <section className="card" id="community">
+    <section className="card reveal" ref={ref} id="community">
       <div className="section-heading">
         <h2>The cohort, at a glance</h2>
         <span className="muted">{COHORT.name}</span>
