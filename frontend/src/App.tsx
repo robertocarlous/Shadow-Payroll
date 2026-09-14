@@ -14,7 +14,7 @@ import { Logo, BrandLockup } from './components/Logo';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
-const STAR_COUNT = 80;
+const STAR_COUNT = 48;
 
 function Stars() {
   const stars = useMemo(() => {
@@ -71,6 +71,23 @@ export default function App() {
   const state = usePayrollState();
   const claimsMade = state.status === 'ready' ? Number(state.state.claimsMade) : 0;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Pause all decorative CSS animations while the user is actively scrolling.
+  // Infinite twinkle/drift/shimmer layers shouldn't compete with the
+  // compositor's scroll work; they resume ~160ms after scrolling stops.
+  useEffect(() => {
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    const onScroll = () => {
+      document.body.classList.add('is-scrolling');
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => document.body.classList.remove('is-scrolling'), 160);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (idleTimer) clearTimeout(idleTimer);
+    };
+  }, []);
 
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
 
