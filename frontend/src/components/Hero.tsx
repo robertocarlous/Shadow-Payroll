@@ -1,5 +1,3 @@
-import { ACTIVE_NETWORK } from '../network';
-import { Logo } from './Logo';
 import { AnimatedNumber } from './AnimatedNumber';
 import type { LoadState } from '../usePayrollState';
 
@@ -88,9 +86,6 @@ export function Hero({ state, claimsMade }: { state: LoadState; claimsMade: numb
             <span className="chip chip--violet">
               <span className="chip__dot" /> Zero-knowledge claims
             </span>
-            <span className="chip chip--teal">
-              <span className="chip__dot" /> Live · {ACTIVE_NETWORK}
-            </span>
           </div>
 
           <h1 className="hero__title">
@@ -174,17 +169,6 @@ export function Hero({ state, claimsMade }: { state: LoadState; claimsMade: numb
               </div>
             </div>
           </div>
-
-          <span className="hero-float hero-float--top" aria-hidden="true">
-            <Logo size={18} animated={false} />
-            zero-knowledge proof
-          </span>
-          <span className="hero-float hero-float--right" aria-hidden="true">
-            <i /> unlinkable nullifier
-          </span>
-          <span className="hero-float hero-float--bottom" aria-hidden="true">
-            <i /> merkle root on-chain
-          </span>
         </div>
       </div>
     </section>

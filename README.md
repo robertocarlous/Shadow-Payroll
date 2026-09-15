@@ -221,7 +221,7 @@ Live on Midnight **Preview**: contract deployed, payroll funded (budget 350),
 two payees claimed their private allocations, and the running total
 reconciled — all with real transactions and real ZK proofs.
 
-![Live dashboard showing a fully reconciled payroll on Preview](docs/screenshots/audit-dashboard-preview-live.png)
+![The live Shadow Payroll dashboard on Midnight Preview](docs/screenshots/audit-dashboard-preview-live.png)
 
 **Preprod status:** Preprod's indexer/wallet-sync path has failed repeatedly
 across this project's history (OOM crashes and indexer fall-behind that broke

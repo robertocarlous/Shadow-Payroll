@@ -1,6 +1,6 @@
 import type { LoadState } from '../usePayrollState';
 import { AnimatedNumber } from './AnimatedNumber';
-import { Celebration, MoonPhase } from './MoonPhase';
+import { CelebrateOnReconcile, MoonPhase } from './MoonPhase';
 import { useReveal } from '../useReveal';
 
 function StatTile({ label, value }: { label: string; value: number }) {
@@ -61,7 +61,7 @@ export function PayrollStatus({ state }: { state: LoadState }) {
 
   return (
     <>
-      {reconciled && initialized && <Celebration />}
+      <CelebrateOnReconcile reconciled={reconciled} initialized={initialized} />
       <section className={`card status-card reveal ${reconciled ? 'is-reconciled' : ''}`} ref={ref} id="status">
         <div className="section-heading">
           <h2><span className="section-heading__num">01</span>Payroll status</h2>

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 
 const PHASES = [
@@ -102,10 +102,35 @@ export function MoonPhase({
   );
 }
 
-/** Fires once when the payroll becomes fully reconciled. */
-export function Celebration() {
+const CELEBRATION_MS = 7000;
+
+/**
+ * Fires a brief confetti burst only on the moment the payroll transitions
+ * into "fully reconciled" during this session — never on initial page load,
+ * even when the contract is already reconciled when the page is opened.
+ */
+export function CelebrateOnReconcile({ reconciled, initialized }: { reconciled: boolean; initialized: boolean }) {
+  const prevRef = useRef<boolean | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
+
+  useEffect(() => {
+    const isReconciled = reconciled && initialized;
+    if (prevRef.current === false && isReconciled) {
+      setCelebrating(true);
+      const timer = setTimeout(() => setCelebrating(false), CELEBRATION_MS);
+      prevRef.current = isReconciled;
+      return () => clearTimeout(timer);
+    }
+    prevRef.current = isReconciled;
+  }, [reconciled, initialized]);
+
+  return celebrating ? <Celebration /> : null;
+}
+
+/** One 7s confetti burst. */
+function Celebration() {
   const pieces = useRef(
-    Array.from({ length: 36 }, (_, i) => {
+    Array.from({ length: 20 }, (_, i) => {
       let seed = i * 7919 + 17;
       const rand = () => {
         seed = (seed * 16807) % 2147483647;
@@ -113,9 +138,9 @@ export function Celebration() {
       };
       return {
         left: rand() * 100,
-        delay: rand() * 2.2,
-        duration: 3 + rand() * 2.5,
-        size: 6 + rand() * 6,
+        delay: rand() * 1.2,
+        duration: 2.4 + rand() * 1.8,
+        size: 5 + rand() * 5,
         color: ['#f2c94c', '#7c6cff', '#35e0c4', '#ffdf8e'][Math.floor(rand() * 4)],
         round: rand() > 0.6,
       };

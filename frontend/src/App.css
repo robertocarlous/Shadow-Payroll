@@ -1282,68 +1282,6 @@ a {
   filter: none;
 }
 
-/* Floating brand tags around the terminal */
-
-.hero-float {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 13px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--surface-glass-3);
-  border: 1px solid var(--hairline-strong);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  white-space: nowrap;
-  animation: float-slow 6s ease-in-out infinite;
-}
-
-.hero-float i {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--teal);
-  box-shadow: 0 0 8px var(--teal);
-}
-
-.hero-float svg {
-  filter: drop-shadow(0 0 8px rgba(240, 195, 86, 0.5));
-}
-
-@keyframes float-slow {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.hero-float--top {
-  top: -6px;
-  left: -12px;
-}
-
-.hero-float--right {
-  right: -6px;
-  top: 38%;
-  animation-delay: -2s;
-}
-
-.hero-float--bottom {
-  bottom: -4px;
-  left: 6px;
-  animation-delay: -4s;
-}
-
 /* ---------- Layout / cards ---------- */
 
 .layout {
@@ -2501,10 +2439,10 @@ a {
 .celebrate span {
   position: absolute;
   top: -5vh;
-  opacity: 0.95;
+  opacity: 0.85;
   animation-name: confetti-fall;
   animation-timing-function: linear;
-  animation-iteration-count: 2;
+  animation-iteration-count: 1;
   animation-fill-mode: forwards;
 }
 

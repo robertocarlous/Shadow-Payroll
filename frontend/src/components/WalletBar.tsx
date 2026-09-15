@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useWallet } from '../context/WalletContext';
 
-const STATUS_LABEL: Record<string, string> = {
-  disconnected: 'Connect wallet',
-  connecting: 'Connecting…',
-  connected: 'Connected',
-  error: 'Retry connection',
-};
-
 /**
  * Compact wallet control that lives in the sticky top nav.
  * Includes a detail modal with connection status, helpful actions,
@@ -56,23 +49,19 @@ export function WalletBar() {
     <div className={`wallet-chip wallet-chip--${status}`}>
       <span className="wallet-dot" data-state={status} aria-hidden="true" />
       {connected && unshieldedAddress ? (
-        <button className="wallet-chip__address-btn" onClick={() => setShowDetails(true)} title="View wallet details">
-          <code className="wallet-chip__address">
-            {unshieldedAddress.slice(0, 8)}…{unshieldedAddress.slice(-4)}
-          </code>
-        </button>
+        <>
+          <button className="wallet-chip__address-btn" onClick={() => setShowDetails(true)} title="View wallet details">
+            <code className="wallet-chip__address">
+              {unshieldedAddress.slice(0, 8)}…{unshieldedAddress.slice(-4)}
+            </code>
+          </button>
+          <button className="btn btn--ghost btn--small" onClick={disconnect}>
+            Disconnect
+          </button>
+        </>
       ) : (
-        <button className="wallet-chip__label-btn" onClick={handlePrimaryAction} title={error ?? ''}>
-          <span className="wallet-chip__label">{STATUS_LABEL[status]}</span>
-        </button>
-      )}
-      {connected ? (
-        <button className="btn btn--ghost btn--small" onClick={disconnect}>
-          Disconnect
-        </button>
-      ) : (
-        <button className="btn btn--primary btn--small" onClick={handlePrimaryAction}>
-          {status === 'connecting' ? '…' : 'Connect'}
+        <button className="btn btn--primary btn--small" onClick={handlePrimaryAction} title={error ?? ''}>
+          {status === 'connecting' ? 'Connecting…' : status === 'error' ? 'Retry connection' : 'Connect wallet'}
         </button>
       )}
 
