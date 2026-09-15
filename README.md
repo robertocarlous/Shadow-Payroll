@@ -1,4 +1,6 @@
-# 🌕 Shadow Payroll
+<img src="frontend/public/logo.png" width="84" height="84" alt="Shadow Payroll logo" />
+
+# Shadow Payroll
 
 **Private payroll and revenue splits on [Midnight](https://midnight.network) — transparency without revealing who earns what.**
 
