@@ -14,7 +14,7 @@ import { Logo, BrandLockup } from './components/Logo';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
-const STAR_COUNT = 48;
+const STAR_COUNT = 28;
 
 function Stars() {
   const stars = useMemo(() => {
@@ -52,8 +52,6 @@ function Stars() {
           }}
         />
       ))}
-      <div className="aurora aurora--a" />
-      <div className="aurora aurora--b" />
     </div>
   );
 }

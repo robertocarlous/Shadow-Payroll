@@ -79,14 +79,7 @@ export function Hero({ state, claimsMade }: { state: LoadState; claimsMade: numb
     <section className="hero" id="top">
       <div className="hero__inner">
         <div className="hero__content">
-          <div className="hero__chips" aria-hidden="true">
-            <span className="chip">
-              <span className="chip__dot" /> Proof-of-privacy payroll
-            </span>
-            <span className="chip chip--violet">
-              <span className="chip__dot" /> Zero-knowledge claims
-            </span>
-          </div>
+          <p className="hero__eyebrow">Private payroll on Midnight</p>
 
           <h1 className="hero__title">
             Private payouts.
@@ -95,34 +88,20 @@ export function Hero({ state, claimsMade }: { state: LoadState; claimsMade: numb
           </h1>
 
           <p className="hero__lead">
-            A privacy-preserving payroll where every payee&apos;s amount stays secret — and everyone
-            can watch the money add up correctly. Claim with a{' '}
-            <strong>zero-knowledge proof</strong>; the dashboard proves the whole payroll
-            reconciled without ever revealing who got what.
+            Every payee&apos;s amount stays secret. Claim with a <strong>zero-knowledge proof</strong>{' '}
+            and the dashboard proves the whole payroll reconciled — without revealing who got what.
           </p>
 
           <div className="hero__actions">
             <a className="btn btn--primary btn--lg" href="#claim">
               Claim my payout
             </a>
-            <a className="btn btn--ghost btn--lg" href="#how-it-works">
-              See how it works
+            <a className="hero__link" href="#how-it-works">
+              See how it works <span aria-hidden="true">→</span>
             </a>
           </div>
 
-          <div className="hero__moon-strip" aria-hidden="true">
-            <MoonGlyph phase={0} />
-            <MoonGlyph phase={0.25} />
-            <MoonGlyph phase={0.5} />
-            <MoonGlyph phase={0.75} />
-            <MoonGlyph phase={1} lit />
-            <span className="hero__moon-strip__label">watch the moon fill as claims land</span>
-          </div>
-
-          <p className="hero__network">
-            50-person Full Moon cohort onboarding · claim with a zero-knowledge proof, watch the
-            payroll reconcile on-chain
-          </p>
+          <p className="hero__network">50-person Full Moon cohort · Midnight Preview network</p>
         </div>
 
         <div className="hero__stage" aria-hidden="true">
