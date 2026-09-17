@@ -5,7 +5,6 @@ import { WalletProvider } from './context/WalletContext';
 import { WalletBar } from './components/WalletBar';
 import { Hero } from './components/Hero';
 import { PayrollStatus } from './components/PayrollStatus';
-import { HowItWorks } from './components/HowItWorks';
 import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { ClaimPanel } from './components/ClaimPanel';
 import { Faq } from './components/Faq';
@@ -57,7 +56,6 @@ function Stars() {
 
 const NAV_LINKS = [
   ['#status', 'Status'],
-  ['#how-it-works', 'How it works'],
   ['#onboarding', 'Get started'],
   ['#claim', 'Claim'],
   ['#faq', 'FAQ'],
@@ -151,8 +149,6 @@ export default function App() {
           <Hero state={state} claimsMade={claimsMade} />
 
           <PayrollStatus state={state} />
-
-          <HowItWorks />
 
           <OnboardingChecklist />
 

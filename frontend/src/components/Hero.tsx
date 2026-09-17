@@ -96,7 +96,7 @@ export function Hero({ state, claimsMade }: { state: LoadState; claimsMade: numb
             <a className="btn btn--primary btn--lg" href="#claim">
               Claim my payout
             </a>
-            <a className="hero__link" href="#how-it-works">
+            <a className="hero__link" href="#faq">
               See how it works <span aria-hidden="true">→</span>
             </a>
           </div>
