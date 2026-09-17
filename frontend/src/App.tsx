@@ -21,7 +21,6 @@ const NAV_LINKS = [
 
 export default function App() {
   const state = usePayrollState();
-  const claimsMade = state.status === 'ready' ? Number(state.state.claimsMade) : 0;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Pause decorative CSS animations while the user is actively scrolling so
@@ -102,7 +101,7 @@ export default function App() {
         )}
 
         <main className="layout" id="top">
-          <Hero state={state} claimsMade={claimsMade} />
+          <Hero />
 
           <PayrollStatus state={state} />
 

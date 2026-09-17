@@ -664,23 +664,26 @@ a {
 
 .hero {
   position: relative;
-  padding: 56px 0 24px;
+  padding: 64px 0 40px;
 }
 
 .hero__inner {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.7fr);
-  gap: 44px;
-  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .hero__content {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 18px;
-  align-items: flex-start;
-  text-align: left;
+  text-align: center;
+  max-width: 700px;
+}
+
+.hero__lead {
+  margin-inline: auto;
 }
 
 .hero__eyebrow {
@@ -695,8 +698,8 @@ a {
   position: relative;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(38px, 4.2vw, 58px);
-  line-height: 1.06;
+  font-size: clamp(40px, 5vw, 66px);
+  line-height: 1.04;
   font-weight: 700;
   letter-spacing: -2.5px;
   color: var(--text-primary);
@@ -755,323 +758,6 @@ a {
   color: var(--accent);
 }
 
-/* Live ledger terminal panel */
-
-.hero__stage {
-  position: relative;
-  display: grid;
-  place-items: center;
-  padding: 18px 6px;
-}
-
-.hero-panel {
-  /* Re-scope the shared text/hairline/accent tokens for this dark card —
-     every descendant rule below keeps using var(--text-secondary) etc.
-     unchanged, but resolves against the dark-panel palette instead of the
-     page's light one. */
-  --text-primary: var(--panel-dark-text);
-  --text-secondary: var(--panel-dark-text-soft);
-  --text-muted: #847da3;
-  --hairline: var(--panel-dark-hairline);
-  --hairline-strong: var(--panel-dark-hairline-strong);
-  --violet-bright: #a89bff;
-  --accent: #f0c356;
-  --accent-2: #ffe9a8;
-  --accent-deep: #cf8f2c;
-  --accent-grad: linear-gradient(120deg, #ffe9a8, #f0c356 42%, #cf8f2c);
-  --accent-glow: rgba(240, 195, 86, 0.42);
-  --accent-soft: rgba(240, 195, 86, 0.1);
-  --surface-glass-2: rgba(255, 255, 255, 0.03);
-  --surface-glass-3: rgba(255, 255, 255, 0.05);
-
-  position: relative;
-  width: min(100%, 420px);
-  border-radius: 20px;
-  overflow: hidden;
-  background: linear-gradient(170deg, var(--panel-dark-bg), var(--panel-dark-bg-2));
-  border: 1px solid var(--panel-dark-hairline-strong);
-  box-shadow: 0 30px 60px -14px rgba(22, 21, 28, 0.35);
-  color: var(--panel-dark-text);
-  animation: hero-panel-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes hero-panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-panel__chrome {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--hairline);
-  background: rgba(5, 3, 14, 0.4);
-}
-
-.hero-panel__dots {
-  display: flex;
-  gap: 5px;
-}
-
-.hero-panel__dots i {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.hero-panel__dots i:nth-child(1) {
-  background: #f2668b;
-}
-
-.hero-panel__dots i:nth-child(2) {
-  background: #f0c356;
-}
-
-.hero-panel__dots i:nth-child(3) {
-  background: #3ddc84;
-}
-
-.hero-panel__name {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.3px;
-}
-
-.hero-panel__live {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--teal);
-  background: rgba(45, 212, 191, 0.08);
-  border: 1px solid rgba(45, 212, 191, 0.32);
-  padding: 4px 8px;
-  border-radius: 999px;
-}
-
-.hero-panel__live i {
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: var(--status-good);
-  box-shadow: 0 0 7px var(--status-good);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-
-.hero-panel__stream {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  padding: 14px;
-  min-height: 208px;
-}
-
-/* scanline sweep over the stream */
-.hero-panel__stream::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent, rgba(124, 108, 255, 0.08) 45%, transparent);
-  animation: terminal-scan 3.4s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes terminal-scan {
-  0% {
-    transform: translateY(-100%);
-  }
-  55%,
-  100% {
-    transform: translateY(100%);
-  }
-}
-
-.ledger-row {
-  position: relative;
-  display: flex;
-  gap: 9px;
-  padding: 9px 11px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.028);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  animation: ledger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.ledger-row:nth-child(1) {
-  animation-delay: 0.2s;
-}
-
-.ledger-row:nth-child(2) {
-  animation-delay: 0.42s;
-}
-
-.ledger-row:nth-child(3) {
-  animation-delay: 0.64s;
-}
-
-.ledger-row:nth-child(4) {
-  animation-delay: 0.86s;
-}
-
-.ledger-row:nth-child(5) {
-  animation-delay: 1.08s;
-}
-
-@keyframes ledger-in {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.ledger-row__ok {
-  flex: 0 0 20px;
-  width: 20px;
-  height: 20px;
-  margin-top: 1px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  color: var(--status-good);
-  background: rgba(61, 220, 132, 0.12);
-  border: 1px solid rgba(61, 220, 132, 0.35);
-  box-shadow: 0 0 10px rgba(61, 220, 132, 0.18);
-}
-
-.ledger-row__body {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.ledger-row__line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ledger-row__fn {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--violet-bright);
-}
-
-.ledger-row__ok-text {
-  margin-left: auto;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--status-good);
-}
-
-.ledger-row__meta {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ledger-row__meta code {
-  color: var(--text-secondary);
-}
-
-.ledger-row__meta b {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.hero-panel__foot {
-  padding: 12px 14px 14px;
-  border-top: 1px solid var(--hairline);
-  background: rgba(5, 3, 14, 0.32);
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.hero-panel__progress-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.hero-panel__progress-head b {
-  font-size: 13px;
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
-}
-
-.hero-panel__progress-track {
-  height: 8px;
-  margin-top: 6px;
-}
-
-.hero-panel__totals {
-  display: flex;
-  gap: 8px;
-}
-
-.hero-panel__totals span {
-  flex: 1;
-  font-size: 11.5px;
-  color: var(--text-muted);
-  font-family: ui-monospace, monospace;
-  padding: 7px 9px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.hero-panel__totals b {
-  color: var(--text-primary);
-  font-size: 13.5px;
-  font-variant-numeric: tabular-nums;
-}
-
-.hero-panel__moon {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.hero-panel__moon .moon-glyph {
-  filter: none;
-}
-
 /* ---------- Layout / cards ---------- */
 
 .layout {
@@ -1123,10 +809,9 @@ a {
   gap: 13px;
 }
 
-/* The dark "proof panel" cards — Payroll status and (via .hero-panel) the
-   hero ledger — re-scope the shared tokens the same way .hero-panel does,
-   so every descendant color rule below resolves against the dark palette
-   instead of the page's light one. */
+/* The dark "proof panel" card — re-scopes the shared tokens so every
+   descendant color rule below resolves against the dark palette instead
+   of the page's light one. */
 .status-card {
   --text-primary: var(--panel-dark-text);
   --text-secondary: var(--panel-dark-text-soft);
@@ -2368,15 +2053,11 @@ a {
     margin-left: auto;
   }
 
-  .hero__inner {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-
   .hero__content {
     align-items: center;
     text-align: center;
     gap: 18px;
+    max-width: none;
   }
 
   .hero__actions {
@@ -2386,30 +2067,6 @@ a {
   .hero__lead,
   .hero__network {
     max-width: 60ch;
-  }
-
-  .hero__stage {
-    order: 2;
-  }
-
-  .hero-panel {
-    transform: none;
-    animation-name: hero-panel-in-fallback;
-  }
-
-  .hero-panel:hover {
-    transform: none;
-  }
-
-  @keyframes hero-panel-in-fallback {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 }
 
@@ -2461,8 +2118,6 @@ a {
 
 /* While actively scrolling, freeze decorative animations so the
    compositor can dedicate its frames to scrolling. */
-body.is-scrolling .hero-panel__stream::after,
-body.is-scrolling .hero-panel__live i,
 body.is-scrolling .header__badge::before,
 body.is-scrolling .wallet-dot,
 body.is-scrolling .moonviz.is-full .moonviz__moon,
