@@ -17,18 +17,33 @@
    zero-knowledge proofs in your browser; the guarantee is enforced by the
    smart contract, not by trusting us.
 
-## Suggested color palette
+## Color palette
 
-- **Deep space navy** — primary: `#0B1026`
-- **Midnight violet** — accent 1: `#7C6CF0`
-- **Moon silver** — accent 2: `#E8ECFF`
-- **Lunar glow** — highlight: `#F5C96B`
-- **Signal teal** — "live/on-chain" accent: `#2DD4BF`
+The product runs a light, warm palette — closer to Gusto/Deel/Linear-light
+than a dark crypto-trading theme, because Shadow Payroll is a payroll
+product first. The one deliberate dark surface left is the "proof panel":
+the hero ledger card and the Payroll status card, where the moon
+visualization and live claim stream live. That contrast is the brand
+metaphor — privacy lives in the dark card, everything else on the page is
+bright and public.
+
+**Page (light):**
+- **Warm off-white** — background: `#FAF9F6`
+- **Ink** — primary text: `#16151C`
+- **Ink soft** — secondary text: `#5C5968`
+- **Hairline** — borders: `#E8E5DF`
+- **Amber** — the one accent, used sparingly (headline accent, links,
+  section numbers, primary CTA is solid ink instead): `#B8791F`
+
+**Proof panels (dark, intentional contrast):**
+- **Panel dark** — background: `#14121F` → `#0E0C18`
+- **Panel text** — `#ECE9F5`
+- **Bright gold** — accent inside the dark panels only: `#F0C356`
+- **Signal teal** — "on-chain/live" accent: `#2DD4BF`
+- **Violet** — proof/claim function names: `#A89BFF`
 - **Ember rose** — caution/error: `#F2668B`
 
-Key pair: deep navy background with violet primary CTA and moon-silver
-text — the "night sky" identity. Gold is reserved for the "reconciled/fully
-claimed" state.
+Full token definitions live in `frontend/src/App.css` (`:root`).
 
 ## X profile bio (under 160 chars)
 

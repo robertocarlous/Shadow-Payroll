@@ -16,7 +16,7 @@ function StatTile({ label, value }: { label: string; value: number }) {
 
 function Skeleton() {
   return (
-    <section className="card" id="status">
+    <section className="card status-card" id="status">
       <div className="section-heading">
         <h2><span className="section-heading__num">01</span>Payroll status</h2>
       </div>
@@ -43,7 +43,7 @@ export function PayrollStatus({ state }: { state: LoadState }) {
 
   if (state.status === 'error') {
     return (
-      <section className="card reveal" ref={ref} id="status">
+      <section className="card status-card reveal" ref={ref} id="status">
         <div className="section-heading">
           <h2><span className="section-heading__num">01</span>Payroll status</h2>
         </div>

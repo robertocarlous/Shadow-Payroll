@@ -1,42 +1,53 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --font-display: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /* Brand palette — "night sky" identity */
-  --bg: #06040f;
-  --bg-soft: #0a0819;
+  /* Brand palette — warm, light "payroll SaaS" identity. The one dark
+     surface left (--panel-dark, used only by the proof/ledger panels) is
+     the deliberate accent: privacy lives in the dark card, everything
+     else on the page is bright and public. */
+  --bg: #faf9f6;
+  --bg-soft: #f3f1ec;
 
-  --surface-glass: rgba(14, 11, 30, 0.68);
-  --surface-glass-2: rgba(10, 8, 24, 0.55);
-  --surface-glass-3: rgba(19, 16, 40, 0.9);
-  --surface-1: rgba(255, 255, 255, 0.028);
+  --surface-glass: #ffffff;
+  --surface-glass-2: #ffffff;
+  --surface-glass-3: #fcfbf8;
+  --surface-1: rgba(22, 21, 28, 0.03);
 
-  --text-primary: #f5f3ff;
-  --text-secondary: #b6b0d4;
-  --text-muted: #777291;
+  --text-primary: #16151c;
+  --text-secondary: #5c5968;
+  --text-muted: #928da0;
 
-  --violet: #7c6cf0;
-  --violet-bright: #a89bff;
-  --teal: #2dd4bf;
+  --violet: #6c5ce0;
+  --violet-bright: #5a45d6;
+  --teal: #178a6c;
 
-  --accent: #f0c356;
-  --accent-2: #ffe9a8;
-  --accent-deep: #cf8f2c;
-  --accent-grad: linear-gradient(120deg, #ffe9a8, #f0c356 42%, #cf8f2c);
-  --accent-glow: rgba(240, 195, 86, 0.42);
-  --accent-soft: rgba(240, 195, 86, 0.1);
+  --accent: #b8791f;
+  --accent-2: #8f5c12;
+  --accent-deep: #7a4c0f;
+  --accent-grad: linear-gradient(120deg, #d69a3d, #b8791f 60%, #8f5c12);
+  --accent-glow: rgba(184, 121, 31, 0.28);
+  --accent-soft: rgba(184, 121, 31, 0.1);
 
-  --status-good: #3ddc84;
-  --status-critical: #f2668b;
-  --status-pending-fg: #c7c2da;
-  --status-info: #b8c7ff;
+  --status-good: #1f9d5c;
+  --status-critical: #d1425c;
+  --status-pending-fg: #5c5968;
+  --status-info: #4a5fd1;
 
-  --hairline: rgba(255, 255, 255, 0.08);
-  --hairline-strong: rgba(255, 255, 255, 0.17);
+  --hairline: #e8e5df;
+  --hairline-strong: #d8d4cb;
 
-  --radius-card: 22px;
-  --radius-ctrl: 13px;
+  /* The dark "proof panel" surface — hero ledger card, payroll status card. */
+  --panel-dark-bg: #14121f;
+  --panel-dark-bg-2: #0e0c18;
+  --panel-dark-text: #ece9f5;
+  --panel-dark-text-soft: #a49dc2;
+  --panel-dark-hairline: rgba(255, 255, 255, 0.08);
+  --panel-dark-hairline-strong: rgba(255, 255, 255, 0.14);
+
+  --radius-card: 20px;
+  --radius-ctrl: 12px;
 }
 
 * {
@@ -60,31 +71,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Viewport-fixed mood lighting (fast: sits on its own composited layer) —
-   one quiet wash, not a multi-color glow, so content stays the loudest
-   thing on the page. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(1100px 600px at 82% -12%, rgba(124, 108, 255, 0.1), transparent 60%);
-}
-
-/* Fine film-grain over everything for a premium, print-like texture.
-   Painted with plain alpha (no mix-blend-mode) so the compositor can
-   cache the tile instead of re-blending the whole page every scroll frame. */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-}
-
 a {
   color: var(--accent);
 }
@@ -93,37 +79,6 @@ a {
   outline: 2px solid var(--violet-bright);
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-/* ---------- Night-sky decoration ---------- */
-
-.stars {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.star {
-  position: absolute;
-  border-radius: 999px;
-  background: #fff;
-  opacity: 0.85;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
-  animation: twinkle ease-in-out infinite;
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.12;
-    transform: scale(0.7);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.15);
-  }
 }
 
 /* ---------- Page ---------- */
@@ -151,25 +106,11 @@ a {
   gap: 16px;
   padding: 9px 12px 9px 16px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(23, 18, 48, 0.75), rgba(10, 8, 26, 0.66));
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   border: 1px solid var(--hairline);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.header::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 18%;
-  right: 18%;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(240, 195, 86, 0.5), rgba(124, 108, 255, 0.5), transparent);
-  opacity: 0.7;
+  box-shadow: 0 12px 30px rgba(22, 21, 28, 0.07);
 }
 
 .header__brand {
@@ -201,10 +142,7 @@ a {
 }
 
 .header__name-shadow {
-  background: linear-gradient(120deg, #fff, #dcd6ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-primary);
 }
 
 .header__name-divider {
@@ -328,7 +266,7 @@ a {
 .mobile-nav__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(5, 3, 14, 0.68);
+  background: rgba(22, 21, 28, 0.32);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   animation: fade-in 0.22s ease both;
@@ -343,9 +281,9 @@ a {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: linear-gradient(180deg, rgba(24, 19, 50, 0.98), rgba(9, 7, 23, 0.98));
+  background: #ffffff;
   border-left: 1px solid var(--hairline);
-  box-shadow: -24px 0 60px rgba(0, 0, 0, 0.5);
+  box-shadow: -24px 0 60px rgba(22, 21, 28, 0.14);
   animation: nav-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -464,9 +402,8 @@ a {
   gap: 9px;
   padding: 5px 6px 5px 14px;
   border-radius: 999px;
-  background: rgba(5, 3, 14, 0.5);
+  background: var(--surface-glass-3);
   border: 1px solid var(--hairline);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .wallet-dot {
@@ -598,28 +535,10 @@ a {
   overflow-y: auto;
   border-radius: 24px;
   padding: 34px 32px;
-  background: linear-gradient(165deg, rgba(30, 23, 58, 0.97), rgba(11, 9, 26, 0.97));
-  border: 1px solid var(--hairline-strong);
-  box-shadow:
-    0 30px 90px rgba(0, 0, 0, 0.65),
-    0 0 50px rgba(124, 108, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  background: #ffffff;
+  border: 1px solid var(--hairline);
+  box-shadow: 0 30px 70px rgba(22, 21, 28, 0.22);
   animation: modal-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.wallet-modal__panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(160deg, rgba(255, 233, 168, 0.35), rgba(255, 255, 255, 0.05) 35%, rgba(124, 108, 255, 0.25) 70%, rgba(45, 212, 191, 0.15));
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
 }
 
 @keyframes modal-rise {
@@ -662,10 +581,7 @@ a {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.4px;
-  background: linear-gradient(120deg, #fff, #e4dcff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-primary);
 }
 
 .wallet-modal__body {
@@ -727,7 +643,7 @@ a {
   font-size: 13px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(5, 3, 14, 0.6);
+  background: var(--bg-soft);
   border: 1px solid var(--hairline);
   word-break: break-all;
   color: var(--text-secondary);
@@ -783,7 +699,7 @@ a {
   line-height: 1.06;
   font-weight: 700;
   letter-spacing: -2.5px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .hero__title-accent {
@@ -849,15 +765,33 @@ a {
 }
 
 .hero-panel {
+  /* Re-scope the shared text/hairline/accent tokens for this dark card —
+     every descendant rule below keeps using var(--text-secondary) etc.
+     unchanged, but resolves against the dark-panel palette instead of the
+     page's light one. */
+  --text-primary: var(--panel-dark-text);
+  --text-secondary: var(--panel-dark-text-soft);
+  --text-muted: #847da3;
+  --hairline: var(--panel-dark-hairline);
+  --hairline-strong: var(--panel-dark-hairline-strong);
+  --violet-bright: #a89bff;
+  --accent: #f0c356;
+  --accent-2: #ffe9a8;
+  --accent-deep: #cf8f2c;
+  --accent-grad: linear-gradient(120deg, #ffe9a8, #f0c356 42%, #cf8f2c);
+  --accent-glow: rgba(240, 195, 86, 0.42);
+  --accent-soft: rgba(240, 195, 86, 0.1);
+  --surface-glass-2: rgba(255, 255, 255, 0.03);
+  --surface-glass-3: rgba(255, 255, 255, 0.05);
+
   position: relative;
   width: min(100%, 420px);
   border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(170deg, rgba(22, 17, 46, 0.92), rgba(8, 6, 22, 0.94));
-  border: 1px solid var(--hairline-strong);
-  box-shadow:
-    0 30px 70px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(170deg, var(--panel-dark-bg), var(--panel-dark-bg-2));
+  border: 1px solid var(--panel-dark-hairline-strong);
+  box-shadow: 0 30px 60px -14px rgba(22, 21, 28, 0.35);
+  color: var(--panel-dark-text);
   animation: hero-panel-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -1157,56 +1091,16 @@ a {
   scroll-margin-top: 100px;
   content-visibility: auto;
   contain-intrinsic-size: auto 480px;
-  background: linear-gradient(168deg, rgba(28, 22, 58, 0.86), rgba(11, 8, 28, 0.82));
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: #ffffff;
   border: 1px solid var(--hairline);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 44px -18px rgba(22, 21, 28, 0.12);
   transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    152deg,
-    rgba(255, 255, 255, 0.24),
-    rgba(255, 255, 255, 0.03) 32%,
-    rgba(124, 108, 255, 0.18) 60%,
-    rgba(240, 195, 86, 0.26)
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-.card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
-  border-radius: inherit;
-  pointer-events: none;
 }
 
 .card:hover {
   transform: translateY(-3px);
   border-color: var(--hairline-strong);
-  box-shadow:
-    0 30px 70px rgba(0, 0, 0, 0.5),
-    0 0 44px rgba(124, 108, 255, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  box-shadow: 0 26px 54px -18px rgba(22, 21, 28, 0.16);
 }
 
 .section-heading {
@@ -1223,13 +1117,39 @@ a {
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  background: linear-gradient(120deg, #fff, #ddd5ff 70%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 13px;
+}
+
+/* The dark "proof panel" cards — Payroll status and (via .hero-panel) the
+   hero ledger — re-scope the shared tokens the same way .hero-panel does,
+   so every descendant color rule below resolves against the dark palette
+   instead of the page's light one. */
+.status-card {
+  --text-primary: var(--panel-dark-text);
+  --text-secondary: var(--panel-dark-text-soft);
+  --text-muted: #847da3;
+  --hairline: var(--panel-dark-hairline);
+  --hairline-strong: var(--panel-dark-hairline-strong);
+  --violet-bright: #a89bff;
+  --accent: #f0c356;
+  --accent-2: #ffe9a8;
+  --accent-deep: #cf8f2c;
+  --accent-grad: linear-gradient(120deg, #ffe9a8, #f0c356 42%, #cf8f2c);
+  --accent-glow: rgba(240, 195, 86, 0.42);
+  --accent-soft: rgba(240, 195, 86, 0.1);
+  --surface-glass-2: rgba(255, 255, 255, 0.03);
+  --surface-glass-3: rgba(255, 255, 255, 0.05);
+
+  background: linear-gradient(168deg, var(--panel-dark-bg), var(--panel-dark-bg-2));
+  border-color: var(--panel-dark-hairline-strong);
+  box-shadow: 0 24px 54px -18px rgba(22, 21, 28, 0.35);
+}
+
+.status-card:hover {
+  box-shadow: 0 30px 64px -18px rgba(22, 21, 28, 0.4);
 }
 
 .section-heading__num {
@@ -1725,15 +1645,15 @@ a {
   gap: 10px;
   margin: 6px 0 8px;
   padding: 10px 8px 10px 14px;
-  background: rgba(5, 3, 14, 0.6);
-  border: 1px solid var(--hairline);
+  background: var(--panel-dark-bg);
+  border: 1px solid var(--panel-dark-hairline);
   border-radius: 10px;
 }
 
 .check-row__code code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12.5px;
-  color: var(--teal);
+  color: #6fe3c4;
   overflow-wrap: anywhere;
 }
 
@@ -1741,9 +1661,9 @@ a {
   flex: 0 0 auto;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--surface-glass-3);
-  border: 1px solid var(--hairline-strong);
+  color: var(--panel-dark-text-soft);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-dark-hairline-strong);
   border-radius: 7px;
   padding: 5px 10px;
   cursor: pointer;
@@ -1751,8 +1671,8 @@ a {
 }
 
 .check-row__copy:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: #f0c356;
+  color: #f0c356;
 }
 
 .check-row__help {
@@ -1769,16 +1689,6 @@ a {
 
 .claim-panel {
   border-radius: 24px;
-}
-
-.claim-panel::before {
-  background: linear-gradient(
-    152deg,
-    rgba(240, 195, 86, 0.5),
-    rgba(255, 255, 255, 0.05) 30%,
-    rgba(124, 108, 255, 0.28) 62%,
-    rgba(45, 212, 191, 0.4)
-  );
 }
 
 .claim-panel__hint {
@@ -1916,12 +1826,16 @@ a {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
   padding: 14px;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--panel-dark-hairline);
   border-radius: 14px;
-  background: rgba(5, 3, 14, 0.6);
-  color: var(--text-primary);
+  background: var(--panel-dark-bg);
+  color: var(--panel-dark-text);
   resize: vertical;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.claim-panel__textarea::placeholder {
+  color: var(--panel-dark-text-soft);
 }
 
 .claim-panel__textarea:focus {
@@ -2056,22 +1970,16 @@ a {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, #ffe9a8, var(--accent) 46%, var(--accent-deep));
-  background-size: 150% 150%;
-  color: #241a00;
+  background: var(--text-primary);
+  color: #ffffff;
   border-color: transparent;
-  box-shadow:
-    0 8px 26px rgba(240, 195, 86, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  box-shadow: 0 10px 24px -8px rgba(22, 21, 28, 0.4);
 }
 
 .btn--primary:not(:disabled):hover {
-  box-shadow:
-    0 12px 34px rgba(240, 195, 86, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.28) inset;
+  box-shadow: 0 14px 30px -8px rgba(22, 21, 28, 0.48);
   transform: translateY(-1px);
-  filter: brightness(1.04);
-  background-position: 100% 50%;
+  filter: brightness(1.15);
 }
 
 .btn--primary:not(:disabled):active {
@@ -2081,16 +1989,13 @@ a {
 .btn--ghost {
   background: var(--surface-glass-2);
   color: var(--text-primary);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .btn--ghost:not(:disabled):hover {
   background: var(--surface-glass-3);
   border-color: var(--violet-bright);
   transform: translateY(-1px);
-  box-shadow: 0 8px 26px rgba(124, 108, 255, 0.2);
+  box-shadow: 0 8px 20px -6px rgba(108, 92, 224, 0.25);
 }
 
 .btn--lg {
@@ -2251,10 +2156,7 @@ a {
 }
 
 .brand-lockup__shadow {
-  background: linear-gradient(120deg, #fff, #e2dcff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-primary);
 }
 
 .brand-lockup__divider {
@@ -2317,7 +2219,7 @@ a {
   color: var(--text-primary);
   border-color: var(--hairline-strong);
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 108, 255, 0.14);
+  box-shadow: 0 6px 16px -4px rgba(22, 21, 28, 0.18);
 }
 
 .footer__tagline {
@@ -2435,18 +2337,18 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #3a3160, #221c42);
+  background: #d8d4cb;
   border-radius: 999px;
   border: 3px solid var(--bg);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #4a3f80, #2c244f);
+  background: #c4bfb2;
 }
 
 ::selection {
-  background: rgba(240, 195, 86, 0.32);
-  color: #fff;
+  background: rgba(184, 121, 31, 0.24);
+  color: var(--text-primary);
 }
 
 /* ---------- Responsive ---------- */
@@ -2477,7 +2379,6 @@ a {
     gap: 18px;
   }
 
-  .hero__chips,
   .hero__actions {
     justify-content: center;
   }
@@ -2509,14 +2410,6 @@ a {
       opacity: 1;
       transform: translateY(0);
     }
-  }
-
-  .hero-float--top {
-    left: 0;
-  }
-
-  .hero-float--right {
-    right: 0;
   }
 }
 
@@ -2568,7 +2461,6 @@ a {
 
 /* While actively scrolling, freeze decorative animations so the
    compositor can dedicate its frames to scrolling. */
-body.is-scrolling .star,
 body.is-scrolling .hero-panel__stream::after,
 body.is-scrolling .hero-panel__live i,
 body.is-scrolling .header__badge::before,
