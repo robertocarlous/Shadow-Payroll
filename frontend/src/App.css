@@ -1718,14 +1718,47 @@ a {
   font-weight: 600;
 }
 
-.check-row__meta code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+.check-row__code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0 8px;
+  padding: 10px 8px 10px 14px;
   background: rgba(5, 3, 14, 0.6);
   border: 1px solid var(--hairline);
-  padding: 3px 8px;
-  border-radius: 7px;
+  border-radius: 10px;
+}
+
+.check-row__code code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
   color: var(--teal);
+  overflow-wrap: anywhere;
+}
+
+.check-row__copy {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-glass-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.check-row__copy:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.check-row__help {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
 }
 
 .check-list__complete {

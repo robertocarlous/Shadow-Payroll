@@ -13,20 +13,23 @@ const STEPS = [
   {
     id: 'network',
     title: 'Switch Lace to the Preview network',
-    body: 'Midnight Preview is the test network this payroll runs on. Choose it in Lace settings so your wallet signs Preview transactions.',
+    body: 'Open Lace, go to Settings, and pick "Preview" as the network. That just tells your wallet which test environment this payroll lives on.',
   },
   {
     id: 'dust',
-    title: 'Get Preview funds from the faucet',
-    body: 'Claims cost a tiny amount of DUST. Grab some free tNight/DUST from the Preview faucet and send it to your wallet.',
+    title: 'Get free test funds',
+    body: 'Claiming costs a tiny, free test fee. Grab some from the faucet below and drop it into your wallet — takes a few seconds.',
     link: 'https://midnight-tmnight-preview.nethermind.dev',
-    linkLabel: 'Preview faucet',
+    linkLabel: 'Open the faucet',
   },
   {
     id: 'proof-server',
-    title: 'Start the local proof-server',
-    body: 'Lace does not generate Midnight proofs in-wallet yet, so proving runs against a local proof-server. One command:',
+    title: 'Turn on your privacy engine',
+    body: "Sounds technical, but it's one copy-pasted command. Your wallet can't yet prove your claim by itself, so this runs that proof privately on your own computer — nothing about your claim ever leaves it. Paste the command below into a terminal.",
+    link: 'https://www.docker.com/products/docker-desktop/',
+    linkLabel: "Don't have Docker? Get it free",
     code: 'docker compose up -d proof-server',
+    help: "Stuck here? That's normal on a first try — open a GitHub issue and we'll walk you through it.",
   },
   {
     id: 'connect',
@@ -41,6 +44,19 @@ const STEPS = [
 ];
 
 function CheckRow({ step, done, onToggle }: { step: (typeof STEPS)[number]; done: boolean; onToggle: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyCode = async () => {
+    if (!step.code) return;
+    try {
+      await navigator.clipboard.writeText(step.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable — the command is still selectable by hand
+    }
+  };
+
   return (
     <li className="check-row">
       <button
@@ -59,15 +75,26 @@ function CheckRow({ step, done, onToggle }: { step: (typeof STEPS)[number]; done
       <div className="check-row__body">
         <h3>{step.title}</h3>
         <p>{step.body}</p>
+
+        {step.code && (
+          <div className="check-row__code">
+            <code>{step.code}</code>
+            <button type="button" className="check-row__copy" onClick={copyCode}>
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+        )}
+
         <div className="check-row__meta">
           {step.link && (
             <a href={step.link} target="_blank" rel="noreferrer">
               {step.linkLabel}
             </a>
           )}
-          {step.code && <code>{step.code}</code>}
-          {step.code && <span className="muted"> · runs at {PROOF_SERVER_URL}</span>}
+          {step.code && <span className="muted">runs at {PROOF_SERVER_URL}</span>}
         </div>
+
+        {step.help && <p className="check-row__help">{step.help}</p>}
       </div>
     </li>
   );
