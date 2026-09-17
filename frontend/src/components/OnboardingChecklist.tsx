@@ -125,7 +125,7 @@ export function OnboardingChecklist() {
   return (
     <section className="card reveal" ref={ref} id="onboarding">
       <div className="section-heading">
-        <h2><span className="section-heading__num">01</span>Your first payout, step by step</h2>
+        <h2>Your first payout, step by step</h2>
         <span className="muted">
           {completed}/{STEPS.length} done
         </span>
