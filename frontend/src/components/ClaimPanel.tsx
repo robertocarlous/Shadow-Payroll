@@ -107,7 +107,7 @@ export function ClaimPanel() {
   return (
     <section className="card claim-panel reveal" ref={ref} id="claim">
       <div className="section-heading">
-        <h2><span className="section-heading__num">03</span>Claim your payout</h2>
+        <h2><span className="section-heading__num">02</span>Claim your payout</h2>
         <span className="muted">Private in. Proof out. Amount never shown.</span>
       </div>
 

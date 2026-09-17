@@ -35,7 +35,7 @@ export function Faq() {
   return (
     <section className="card reveal" ref={ref} id="faq">
       <div className="section-heading">
-        <h2><span className="section-heading__num">04</span>Frequently asked questions</h2>
+        <h2><span className="section-heading__num">03</span>Frequently asked questions</h2>
         <span className="muted">Quick answers for your first claim</span>
       </div>
       <div className="faq">

@@ -1,10 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { usePayrollState } from './usePayrollState';
 import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from './network';
 import { WalletProvider } from './context/WalletContext';
 import { WalletBar } from './components/WalletBar';
 import { Hero } from './components/Hero';
-import { PayrollStatus } from './components/PayrollStatus';
 import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { ClaimPanel } from './components/ClaimPanel';
 import { Faq } from './components/Faq';
@@ -13,14 +11,12 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
 const NAV_LINKS = [
-  ['#status', 'Status'],
   ['#onboarding', 'Get started'],
   ['#claim', 'Claim'],
   ['#faq', 'FAQ'],
 ] as const;
 
 export default function App() {
-  const state = usePayrollState();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Pause decorative CSS animations while the user is actively scrolling so
@@ -102,8 +98,6 @@ export default function App() {
 
         <main className="layout" id="top">
           <Hero />
-
-          <PayrollStatus state={state} />
 
           <OnboardingChecklist />
 
