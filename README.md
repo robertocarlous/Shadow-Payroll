@@ -222,9 +222,10 @@ for the data-quality note). The 50-user Level 5 cohort is in [USERS.md](USERS.md
 
 ## Public Network Deployment Status
 
-Live on Midnight **Preview**: contract deployed, payroll funded (budget 350),
-two payees claimed their private allocations, and the running total
-reconciled — all with real transactions and real ZK proofs.
+Live on Midnight **Preview**, redeployed **2026-09-18**: contract deployed
+and payroll funded (budget 100) with real transactions, both confirmed
+on-chain. Claims against this round are open and awaiting payees — track
+progress via the contract address above or the live dashboard.
 
 ![The live Shadow Payroll dashboard on Midnight Preview](docs/screenshots/audit-dashboard-preview-live.png)
 
