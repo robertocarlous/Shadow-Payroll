@@ -210,9 +210,10 @@ Top changes made from user feedback:
 
 ## Level 6 Users
 
-See [LAUNCH_USERS.md](LAUNCH_USERS.md) — the 20-user Supermoon launch cohort
-tracker (wallet addresses fill in as users onboard). The 50-user Level 5
-cohort is in [USERS.md](USERS.md).
+Tracked live in a [Google Sheet](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953) —
+every payee's wallet address, captured alongside their feedback after
+claiming (~40 unique verified respondents; see [LAUNCH_USERS.md](LAUNCH_USERS.md)
+for the data-quality note). The 50-user Level 5 cohort is in [USERS.md](USERS.md).
 
 ## Community & Submission Maps
 
