@@ -227,6 +227,9 @@ and payroll funded (budget 100) with real transactions, both confirmed
 on-chain. Claims against this round are open and awaiting payees — track
 progress via the contract address above or the live dashboard.
 
+Full deployment history, including how to independently verify each
+entry on-chain: [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
+
 ![The live Shadow Payroll dashboard on Midnight Preview](docs/screenshots/audit-dashboard-preview-live.png)
 
 **Preprod status:** Preprod's indexer/wallet-sync path has failed repeatedly

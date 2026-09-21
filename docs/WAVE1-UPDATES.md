@@ -3,9 +3,9 @@
 *(AKINDO Wave 1 submission copy — update the "build period" phrasing before submitting.)*
 
 > **Frozen snapshot:** the contract address below is the Wave 1 deployment,
-> not the current one. The contract has since been redeployed; see the
-> "Public Network Deployment Status" section in the root
-> [README.md](../README.md) for the current address and date.
+> not the current one. The contract has since been redeployed; see
+> [docs/DEPLOYMENTS.md](DEPLOYMENTS.md) for the full, verifiable deployment
+> history and current address.
 
 ## 1. The core MVP: built, deployed, and live on Midnight Preview
 

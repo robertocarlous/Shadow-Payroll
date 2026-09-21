@@ -2,9 +2,9 @@
 
 > **This is a frozen snapshot of the Level 5 submission** — contract address,
 > budget, and screenshots below reflect what was live *at Level 5 time*, not
-> today. The contract has since been redeployed; see the "Public Network
-> Deployment Status" section in the root [README.md](../README.md) for the
-> current address and date.
+> today. The contract has since been redeployed; see
+> [docs/DEPLOYMENTS.md](DEPLOYMENTS.md) for the full, verifiable deployment
+> history and current address.
 
 This document is the Level 5 "Full Moon" submission map: what the milestone
 requires, and exactly where in this repository each requirement is met.
