@@ -106,6 +106,42 @@ build, not just reading the diff.
 **Shipped in:** `MoonPhase.tsx`, `PayrollStatus.tsx`, `Logo.tsx`,
 `public/favicon.svg`, `Hero.tsx`, `WalletBar.tsx`, `App.css`.
 
+### Feedback #5 — User feedback form results (Level 6, 2026-07-13 → 2026-08-12)
+
+Structured feedback collected via the
+[in-app feedback form](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953)
+after payees claimed. 49 rows total; **note for anyone auditing this data:**
+about 20 of those rows (the 2026-07-13/14 batch) are pairs with word-for-word
+identical free-text answers submitted at the identical second under
+different names — almost certainly ~10 duplicated submissions, not 20
+independent ones. The counts below only count each duplicate pair once (40
+responses), and the 2026-08-12 batch (30 rows) shows no such pattern.
+
+Themes, by frequency across the 40 counted responses:
+
+| Theme | Count | Priority |
+|---|---|---|
+| Google sign-in as an alternative to wallet-only auth | 13 | P1 — most-requested single feature |
+| Mobile app support | 10 | P2 |
+| "UI could be better / looks basic / needs polish" | 4 | P1 — independent confirmation of Feedback #4 above, from real users rather than only the reviewer |
+| Faster claim/transaction confirmation | 3 | P2 |
+| More payroll options / cycles | 4 | P2 |
+| Wallet-security clarity | 2 | P2 |
+
+Bugs: none reported (overwhelmingly "No bugs" / "No issues"). Would-
+recommend: 100% "Yes" across all 40. Net read: the core claim flow works
+and people are satisfied with it, but the UI-polish complaint that drove
+Feedback #4 wasn't only a reviewer's opinion — a meaningful slice of real
+users said the same thing independently, before that UI pass shipped.
+
+**Decision:** Google sign-in is out of scope for this cycle — the whole
+product's privacy guarantee is that Lace wallet auth requires no account,
+no password, no custodian; a Google-auth path would need real design work
+to not quietly undermine that. Logging it here as the top open ask for a
+future cycle rather than shipping it half-considered.
+
+**Status:** triaged, not shipped.
+
 ---
 
 ## What We Changed
@@ -135,10 +171,10 @@ cohort, and a `Current count: 0 / 20` counter that updates as users onboard.
 
 | Status | Count | Notes |
 |--------|-------|-------|
-| new | 0 | open for intake via GitHub issues |
-| triaged | 0 | |
+| new | 0 | open for intake via GitHub issues + the [user feedback form](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953) |
+| triaged | 1 | Google sign-in (Feedback #5) — logged, not yet scheduled |
 | shipped | 4+ | Levels 5–6 changes recorded above + [docs/level5/FEEDBACK.md](level5/FEEDBACK.md) |
 
-The loop is **open** — report bugs or suggestions via GitHub issues. Every
-entry is picked up in the weekly triage, prioritised (P0/P1/P2), and if it
-lands it's recorded in the changelog above.
+The loop is **open** — report bugs or suggestions via GitHub issues or the
+feedback form. Every entry is picked up in the weekly triage, prioritised
+(P0/P1/P2), and if it lands it's recorded in the changelog above.

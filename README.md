@@ -187,7 +187,9 @@ Preview" + "Your First Transaction" walkthrough for non-technical users.
 
 ## Feedback & Iterations
 
-The feedback loop is **open**: report bugs or suggestions via GitHub issues.
+The feedback loop is **open**: report bugs or suggestions via GitHub issues,
+or through the [user feedback form](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953)
+every payee is pointed to after claiming (49 responses collected so far).
 Every entry gets a `new → triaged → shipped` lifecycle in the weekly triage.
 
 - **[docs/FEEDBACK-LOOP.md](docs/FEEDBACK-LOOP.md)** — how the loop works

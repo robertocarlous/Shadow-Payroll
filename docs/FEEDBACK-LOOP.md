@@ -10,6 +10,7 @@ and how a decision becomes a shipped change with a changelog entry.
 | Channel | How it works | Data |
 |---|---|---|
 | GitHub issues | Report a bug or suggestion on the repo | Standard issue tracker |
+| [User feedback form](https://docs.google.com/spreadsheets/d/1LeJv0qy7mZjlCg-Ub7vBJuRgfbs-mkhn/edit?gid=1346840953#gid=1346840953) | A short form every payee is pointed to after claiming: rating, what they liked, what to improve, bugs hit, would-recommend, free comment | Google Sheet, one row per submission — name, email, wallet address, network, rating (1–6), free-text answers |
 
 Every feedback entry records: **who** (GitHub username / email),
 **comment**, **timestamp**, and a **status** the loop can advance.
