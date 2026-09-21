@@ -7,6 +7,9 @@ address, deployer's public wallet address, timestamps, transaction IDs).
 Wallet seeds are never committed — see `.midnight-state.json` (gitignored,
 local only) for the private deployment state this log is generated from.
 
+A scoped copy lives at [contracts/DEPLOYMENTS.md](../contracts/DEPLOYMENTS.md),
+next to the contract source itself.
+
 Every entry below is independently verifiable on-chain via the Midnight
 Preview indexer:
 
