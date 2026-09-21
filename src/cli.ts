@@ -45,6 +45,25 @@ function fromHex(hex: string): Uint8Array {
   return new Uint8Array(Buffer.from(hex, 'hex'));
 }
 
+function toHex(bytes: Uint8Array): string {
+  return Buffer.from(bytes).toString('hex');
+}
+
+// Accepts either a raw 64-char hex secret pasted directly, or a path to the
+// employer-secret.json that "Fund payroll" saves -- so the employer doesn't
+// have to keep re-pasting a 32-byte hex string by hand every session.
+async function readEmployerSecret(rl: { question(prompt: string): Promise<string> }): Promise<Uint8Array> {
+  const input = (
+    await rl.question('  Employer secret (hex), or path to employer-secret.json [.payroll/employer-secret.json]: ')
+  ).trim() || '.payroll/employer-secret.json';
+
+  if (/^[0-9a-fA-F]{64}$/.test(input)) {
+    return fromHex(input);
+  }
+  const { empSecret } = JSON.parse(fs.readFileSync(path.resolve(input), 'utf-8'));
+  return fromHex(empSecret);
+}
+
 function loadCredential(filePath: string): PayeeCredential {
   const raw = JSON.parse(fs.readFileSync(path.resolve(filePath), 'utf-8'));
   return {
@@ -179,7 +198,10 @@ async function main() {
       console.log('  3. View public audit state (deposited / claimed / reconciled)');
       console.log('  4. Remove a payee (employer) — revoke before they claim');
       console.log('  5. Check wallet balance');
-      console.log('  6. Exit\n');
+      console.log('  6. Extend claim deadline (employer) — push it later, never earlier');
+      console.log('  7. Pause claims (employer) — circuit breaker, no redeploy needed');
+      console.log('  8. Unpause claims (employer)');
+      console.log('  9. Exit\n');
 
       const choice = await rl.question('  Your choice: ');
 
@@ -203,6 +225,18 @@ async function main() {
             if (deadline > 0n) {
               console.log(`  ⏰ Claims expire: ${new Date(Number(deadline) * 1000).toISOString()}\n`);
             }
+            // The employer secret is the only way back into removePayee,
+            // extendDeadline, pauseClaims, and unpauseClaims later -- it is
+            // never stored on-chain (only its hash is), so if it's lost here
+            // it's lost for good. Save it next to root.json (gitignored).
+            const empSecretPath = path.join(path.dirname(path.resolve(rootPath)), 'employer-secret.json');
+            fs.writeFileSync(
+              empSecretPath,
+              `${JSON.stringify({ empSecret: toHex(empSecret) }, null, 2)}\n`,
+            );
+            console.log(`  🔑 Employer secret: ${toHex(empSecret)}`);
+            console.log(`  Saved to ${empSecretPath} -- needed for removePayee, extendDeadline,`);
+            console.log('  pauseClaims, and unpauseClaims. Keep it; it is never recoverable from chain.\n');
           } catch (error) {
             console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
           }
@@ -253,8 +287,7 @@ async function main() {
           const payeePath = await rl.question('  Path to the payee credential JSON to remove: ');
           try {
             const payeeCred = loadCredential(payeePath.trim());
-            const empSecretInput = (await rl.question('  Your employer secret (hex): ')).trim();
-            const empSecretBytes = fromHex(empSecretInput);
+            const empSecretBytes = await readEmployerSecret(rl);
             console.log('\n  Submitting removePayee transaction (this may take 30-60 seconds)...');
             const tx = await deployed.callTx.removePayee(payeeCred.secret, empSecretBytes);
             console.log(`\n  ✅ Payee "${payeeCred.payeeId}" removed from the payroll.`);
@@ -280,13 +313,53 @@ async function main() {
           break;
         }
 
-        case '6':
+        case '6': {
+          const deadlineInput = (await rl.question('  New claim deadline (Unix seconds, must be later than the current one): ')).trim();
+          try {
+            const empSecretBytes = await readEmployerSecret(rl);
+            console.log('\n  Submitting extendDeadline transaction (this may take 30-60 seconds)...');
+            const tx = await deployed.callTx.extendDeadline(BigInt(deadlineInput), empSecretBytes);
+            console.log(`\n  ✅ Claim deadline extended to ${new Date(Number(deadlineInput) * 1000).toISOString()}`);
+            console.log(`  Transaction ID: ${tx.public.txId}\n`);
+          } catch (error) {
+            console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '7': {
+          try {
+            const empSecretBytes = await readEmployerSecret(rl);
+            console.log('\n  Submitting pauseClaims transaction (this may take 30-60 seconds)...');
+            const tx = await deployed.callTx.pauseClaims(empSecretBytes);
+            console.log('\n  ⏸️  Claims are now paused. Existing claim history is untouched.');
+            console.log(`  Transaction ID: ${tx.public.txId}\n`);
+          } catch (error) {
+            console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '8': {
+          try {
+            const empSecretBytes = await readEmployerSecret(rl);
+            console.log('\n  Submitting unpauseClaims transaction (this may take 30-60 seconds)...');
+            const tx = await deployed.callTx.unpauseClaims(empSecretBytes);
+            console.log('\n  ▶️  Claims are resumed.');
+            console.log(`  Transaction ID: ${tx.public.txId}\n`);
+          } catch (error) {
+            console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '9':
           running = false;
           console.log('\n  👋 Goodbye!\n');
           break;
 
         default:
-          console.log('\n  ❌ Invalid choice. Please enter 1-6.\n');
+          console.log('\n  ❌ Invalid choice. Please enter 1-9.\n');
       }
     }
 

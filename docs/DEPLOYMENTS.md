@@ -23,20 +23,30 @@ curl -s -X POST https://indexer.preview.midnight.network/api/v4/graphql \
 
 ## Preview network
 
-### 2026-09-18 — current
+### 2026-09-21 — current
+
+| Field | Value |
+|---|---|
+| Contract address | `157bc413f2b308b850ae340cc0f1c22951f9ea1c2079c25b9df622f04bc635fe` |
+| Deployer (public address) | `mn_addr_preview10ufjd264h8lw7cj4sv2hqj7r0ar2m3xzczrh0rzmt2uyvhs5wursaeq4yr` |
+| Deployed at | 2026-09-21T17:05:38.320Z |
+| Funded (`fundPayroll`) | budget 100, tx `00933fc956e778b22b3c62837c6097033f0004218fec7a748ac6a469948eab9a48` |
+| Allowlist | `.payroll-fresh-v2/root.json` (same clean demo round reused — leaf/nullifier circuits unchanged, so existing credentials still verify) |
+| Why redeployed | Real contract code change (see below), not just a fresh instance. |
+| Code change from previous | Added three employer-only circuits: `extendDeadline` (push `claimDeadline` later, never earlier), `pauseClaims`/`unpauseClaims` (circuit breaker — freeze new claims without redeploying; claims already made are untouched). `payroll.compact` now compiles 7 circuits, up from 4. |
+
+This is the address in `frontend/.env.production`, the Vercel production
+env var, and the README's "Public Network Deployment Status" table.
+
+### 2026-09-18 — superseded
 
 | Field | Value |
 |---|---|
 | Contract address | `2fc1931ba3dc4558254fd088a0e4db9d03244a8c885118240f699e35d62f0fe5` |
-| Deployer (public address) | `mn_addr_preview10ufjd264h8lw7cj4sv2hqj7r0ar2m3xzczrh0rzmt2uyvhs5wursaeq4yr` |
 | Deployed at | 2026-09-18T02:50:38.161Z |
 | Deploy tx | block 913655 |
 | Funded (`fundPayroll`) | budget 100, tx `003d804a07975448bd57215c593739c601ce9da0b582b1e38c68fbcb28fe939482`, block 964509 |
-| Allowlist | `.payroll-fresh-v2/root.json` (clean demo round, unclaimed at funding) |
-| Why redeployed | Reviewer feedback flagged the previous deployment (below) as stale — no on-chain activity since Aug 15. Redeployed fresh with no contract code changes. |
-
-This is the address in `frontend/.env.production`, the Vercel production
-env var, and the README's "Public Network Deployment Status" table.
+| Why superseded | Reviewer feedback flagged the Aug 15 deployment (below) as stale. Redeployed fresh with no code changes at the time — superseded three days later by the code change above. |
 
 ### 2026-08-15 — superseded
 

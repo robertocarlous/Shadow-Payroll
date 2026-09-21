@@ -11,6 +11,14 @@
 // - Claim expiration: claims are rejected after `claimDeadline` (Unix seconds).
 // - Payee removal: the employer can revoke a payee's allocation before they
 //   claim by adding their nullifier to `removedPayees`.
+//
+// Extensions (Level 6):
+// - Deadline extension: the employer can push `claimDeadline` later without
+//   redeploying, if not everyone has claimed in time. One-directional --
+//   can only extend, never shorten.
+// - Pause/unpause: a circuit breaker. The employer can freeze new claims
+//   (e.g. to respond to a discovered issue) and resume them later, without
+//   redeploying and without touching claims already made.
 
 pragma language_version 0.23;
 
@@ -26,6 +34,7 @@ export ledger initialized: Boolean;
 export ledger claimDeadline: Uint<64>;
 export ledger removedPayees: Set<Bytes<32>>;
 export ledger employerNullifier: Bytes<32>;
+export ledger pausedClaims: Boolean;
 
 constructor() {
   allowlistRoot = default<Bytes<32>>;
@@ -34,6 +43,7 @@ constructor() {
   initialized = false;
   claimDeadline = 0;
   employerNullifier = default<Bytes<32>>;
+  pausedClaims = false;
 }
 
 // -- Witnesses: private, off-chain values supplied locally by the payee. --
@@ -120,6 +130,7 @@ circuit payeeNullifier(secret: Bytes<32>): Bytes<32> {
 // Unix timestamp to override the current time (for testing expiration logic).
 export circuit claim(timeOverride: Uint<64>): [] {
   assert(initialized, "Payroll has not been funded yet");
+  assert(!pausedClaims, "Claims are currently paused by the employer");
 
   const disclosedOverride = disclose(timeOverride);
   if (disclosedOverride != 0) {
@@ -162,6 +173,54 @@ export circuit removePayee(payeeSecret: Bytes<32>, empSecret: Bytes<32>): [] {
 
   const nullifier = payeeNullifier(disclose(payeeSecret));
   removedPayees.insert(nullifier);
+}
+
+// Employer-only circuit: pushes the claim deadline later, e.g. because not
+// everyone has claimed yet. Can only extend, never shorten -- a payee who
+// budgeted their time against the original deadline should never be cut
+// off earlier than promised.
+export circuit extendDeadline(newDeadline: Uint<64>, empSecret: Bytes<32>): [] {
+  assert(initialized, "Payroll has not been funded yet");
+
+  const empNull = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "shadow-payroll:employer:v1"),
+    disclose(empSecret),
+  ]);
+  assert(empNull == employerNullifier, "Only the employer can extend the deadline");
+
+  const disclosedDeadline = disclose(newDeadline);
+  assert(disclosedDeadline > claimDeadline, "New deadline must be later than the current one");
+
+  claimDeadline = disclosedDeadline;
+}
+
+// Employer-only circuit: pauses new claims without redeploying -- e.g. to
+// respond to a discovered issue. Claims already made are untouched; the
+// running total and nullifier set are unaffected. Claims resume once
+// unpauseClaims is called.
+export circuit pauseClaims(empSecret: Bytes<32>): [] {
+  assert(initialized, "Payroll has not been funded yet");
+
+  const empNull = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "shadow-payroll:employer:v1"),
+    disclose(empSecret),
+  ]);
+  assert(empNull == employerNullifier, "Only the employer can pause claims");
+
+  pausedClaims = true;
+}
+
+// Employer-only circuit: resumes claims after a pause.
+export circuit unpauseClaims(empSecret: Bytes<32>): [] {
+  assert(initialized, "Payroll has not been funded yet");
+
+  const empNull = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "shadow-payroll:employer:v1"),
+    disclose(empSecret),
+  ]);
+  assert(empNull == employerNullifier, "Only the employer can unpause claims");
+
+  pausedClaims = false;
 }
 
 // Public read helper for the audit dashboard: true once every claimable

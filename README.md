@@ -25,7 +25,7 @@ total move). See [docs/USAGE.md](docs/USAGE.md) for the step-by-step guide.
 | Network | Address | Status |
 |---------|---------|--------|
 | **Preprod** | *Target network — deploy pending Preprod indexer availability* | pending |
-| **Preview** (live dashboard) | `2fc1931ba3dc4558254fd088a0e4db9d03244a8c885118240f699e35d62f0fe5` | live (redeployed 2026-09-18) |
+| **Preview** (live dashboard) | `157bc413f2b308b850ae340cc0f1c22951f9ea1c2079c25b9df622f04bc635fe` | live (redeployed 2026-09-21) |
 | Preview (judge-testable) | `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369` | live |
 | Preview (first completed run) | `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee` | live |
 
@@ -222,10 +222,16 @@ for the data-quality note). The 50-user Level 5 cohort is in [USERS.md](USERS.md
 
 ## Public Network Deployment Status
 
-Live on Midnight **Preview**, redeployed **2026-09-18**: contract deployed
+Live on Midnight **Preview**, redeployed **2026-09-21**: contract deployed
 and payroll funded (budget 100) with real transactions, both confirmed
 on-chain. Claims against this round are open and awaiting payees — track
 progress via the contract address above or the live dashboard.
+
+This redeploy also shipped two small contract features: employer-only
+`extendDeadline` (push the claim window later without redeploying) and a
+`pauseClaims`/`unpauseClaims` circuit breaker (freeze new claims to respond
+to an issue, without touching claims already made). See
+[contracts/DEPLOYMENTS.md](contracts/DEPLOYMENTS.md) for what changed.
 
 Full deployment history, including how to independently verify each
 entry on-chain: [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
