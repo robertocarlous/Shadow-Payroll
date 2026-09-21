@@ -2,6 +2,11 @@
 
 *(AKINDO Wave 1 submission copy — update the "build period" phrasing before submitting.)*
 
+> **Frozen snapshot:** the contract address below is the Wave 1 deployment,
+> not the current one. The contract has since been redeployed; see the
+> "Public Network Deployment Status" section in the root
+> [README.md](../README.md) for the current address and date.
+
 ## 1. The core MVP: built, deployed, and live on Midnight Preview
 
 During this wave I built the core Shadow Payroll MVP from the ground up in this repository: a privacy-preserving payroll / revenue-split dApp where an employer can pay a team on-chain without ever revealing individual salaries.
