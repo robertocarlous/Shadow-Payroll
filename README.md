@@ -25,7 +25,7 @@ total move). See [docs/USAGE.md](docs/USAGE.md) for the step-by-step guide.
 | Network | Address | Status |
 |---------|---------|--------|
 | **Preprod** | *Target network — deploy pending Preprod indexer availability* | pending |
-| **Preview** (live dashboard) | `8273828c7cc7fe141847c769b8e4ca09c5ba4d44916d13e2f1b8ca60207ab6f0` | live |
+| **Preview** (live dashboard) | `2fc1931ba3dc4558254fd088a0e4db9d03244a8c885118240f699e35d62f0fe5` | live (redeployed 2026-09-18) |
 | Preview (judge-testable) | `6f4a8a9565539e70605789e93f3a94966a4ce4c5670686fff0faf840cdeb7369` | live |
 | Preview (first completed run) | `b1d5cdb3ce84d1cf44551302b2afa46fdce9df1ac51064b7c3d70bbc070902ee` | live |
 
