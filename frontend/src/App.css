@@ -1792,7 +1792,36 @@ a {
   }
 
   .hero__visual {
-    height: 220px;
+    height: 240px;
+  }
+
+  /* The desktop proof-card positions are pixel offsets tuned for a much
+     taller panel; at this height they collide. Spread them across three
+     corners instead so the moon still dominates the fourth. */
+  .hero__proof-card {
+    padding: 10px 13px;
+    font-size: 11.5px;
+  }
+
+  .hero__proof-card--1 {
+    top: 16px;
+    left: 16px;
+    bottom: auto;
+    right: auto;
+  }
+
+  .hero__proof-card--2 {
+    top: 16px;
+    right: 16px;
+    bottom: auto;
+    left: auto;
+  }
+
+  .hero__proof-card--3 {
+    bottom: 16px;
+    left: 16px;
+    top: auto;
+    right: auto;
   }
 }
 
