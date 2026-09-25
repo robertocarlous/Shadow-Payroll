@@ -89,6 +89,70 @@
       }
     },
     {
+      "name": "extendDeadline",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "newDeadline",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "empSecret",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "pauseClaims",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "empSecret",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "unpauseClaims",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "empSecret",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
       "name": "isReconciled",
       "pure": false,
       "proof": true,
@@ -224,6 +288,15 @@
       "type": {
         "type-name": "Bytes",
         "length": 32
+      }
+    },
+    {
+      "name": "pausedClaims",
+      "index": 8,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Boolean"
       }
     }
   ]

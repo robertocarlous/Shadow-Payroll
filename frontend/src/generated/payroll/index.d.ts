@@ -17,6 +17,13 @@ export type ImpureCircuits<PS> = {
   removePayee(context: __compactRuntime.CircuitContext<PS>,
               payeeSecret_0: Uint8Array,
               empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  extendDeadline(context: __compactRuntime.CircuitContext<PS>,
+                 newDeadline_0: bigint,
+                 empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseClaims(context: __compactRuntime.CircuitContext<PS>,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  unpauseClaims(context: __compactRuntime.CircuitContext<PS>,
+                empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   isReconciled(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
@@ -30,6 +37,13 @@ export type ProvableCircuits<PS> = {
   removePayee(context: __compactRuntime.CircuitContext<PS>,
               payeeSecret_0: Uint8Array,
               empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  extendDeadline(context: __compactRuntime.CircuitContext<PS>,
+                 newDeadline_0: bigint,
+                 empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseClaims(context: __compactRuntime.CircuitContext<PS>,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  unpauseClaims(context: __compactRuntime.CircuitContext<PS>,
+                empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   isReconciled(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
@@ -46,6 +60,13 @@ export type Circuits<PS> = {
   removePayee(context: __compactRuntime.CircuitContext<PS>,
               payeeSecret_0: Uint8Array,
               empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  extendDeadline(context: __compactRuntime.CircuitContext<PS>,
+                 newDeadline_0: bigint,
+                 empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseClaims(context: __compactRuntime.CircuitContext<PS>,
+              empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  unpauseClaims(context: __compactRuntime.CircuitContext<PS>,
+                empSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   isReconciled(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
@@ -68,6 +89,7 @@ export type Ledger = {
     [Symbol.iterator](): Iterator<Uint8Array>
   };
   readonly employerNullifier: Uint8Array;
+  readonly pausedClaims: boolean;
 }
 
 export type ContractReferenceLocations = any;
