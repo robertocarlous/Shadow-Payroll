@@ -43,6 +43,24 @@ jobs:
       - name: Typecheck
         run: npm run build
 
+      # frontend/src/generated/payroll and frontend/public/managed/payroll
+      # are vendored copies of the compile output above (Vercel has no
+      # Compact toolchain, so the frontend can't compile at deploy time —
+      # see frontend/scripts/sync-contract.mjs). They're committed, so a
+      # contract change with no re-sync silently ships a frontend whose
+      # claim flow proves against the wrong keys. This step catches that
+      # by re-running the sync against this compile and failing if it
+      # produces a diff, i.e. the committed vendored copy is stale.
+      - name: Verify frontend contract assets are in sync
+        run: |
+          node frontend/scripts/sync-contract.mjs
+          if ! git diff --quiet -- frontend/src/generated frontend/public/managed; then
+            echo "::error::frontend/src/generated and/or frontend/public/managed are out of sync with contracts/payroll.compact."
+            echo "Run 'npm run compile' at the repo root, then 'node scripts/sync-contract.mjs' in frontend/, and commit the result."
+            git --no-pager diff --stat -- frontend/src/generated frontend/public/managed
+            exit 1
+          fi
+
   frontend:
     name: Build audit dashboard
     runs-on: ubuntu-latest
