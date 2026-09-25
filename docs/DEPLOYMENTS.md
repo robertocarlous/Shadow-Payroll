@@ -58,3 +58,33 @@ env var, and the README's "Public Network Deployment Status" table.
 Referenced (frozen, not updated) in [docs/LEVEL5.md](LEVEL5.md) and
 [docs/WAVE1-UPDATES.md](WAVE1-UPDATES.md) as the address live at the time
 of those submissions.
+
+## Preprod network — deployment not currently possible
+
+No contract has ever been deployed to Preprod — not "pending," attempted
+and blocked by infrastructure, most recently re-verified below.
+
+### 2026-09-25 — re-attempted, still not viable
+
+Preprod's indexer answers simple queries fine (`curl` against
+`https://indexer.preprod.midnight.network/api/v4/graphql` returns a current
+block height), which made it look worth retrying. A real wallet sync tells
+a different story:
+
+| Attempt | Heap ceiling | Result |
+|---|---|---|
+| 1 | default (~4 GB) | OOM crash after ~585s, heap at 3.3 GB and still growing |
+| 2 | `--max-old-space-size=8192` | OOM crash after ~1474s, heap at 6.8 GB and still growing |
+
+Heap usage roughly doubled between the two runs rather than plateauing —
+this is unbounded memory growth during wallet sync against the Preprod
+indexer, not a fixed memory requirement that a bigger ceiling would clear.
+Doubling the ceiling only bought ~2.4x more runtime before the same crash.
+This is a confirmed Midnight Preprod infrastructure issue, not a contract,
+client, or address bug — the deployed contract code is identical across
+networks (see the Preview entries above), so there's nothing network-specific
+for a Preprod redeploy to fix.
+
+Preview remains the deployed, documented, and independently-verifiable
+network (see above) until Preprod's indexer/wallet-sync path is stable
+enough to complete a sync without crashing.

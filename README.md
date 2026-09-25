@@ -31,10 +31,15 @@ total move). See [docs/USAGE.md](docs/USAGE.md) for the step-by-step guide.
 
 > **Network note:** Preprod's indexer/wallet-sync path has failed repeatedly
 > across this project's history (OOM crashes and indexer fall-behind that broke
-> DUST fee validity — a confirmed Midnight infrastructure issue). The contract
-> code is identical across networks; Preview is the verified working deployment.
-> Preprod deployment is queued for when infrastructure stabilises — run
-> `npm run setup -- --network preprod` to deploy.
+> DUST fee validity — a confirmed Midnight infrastructure issue). Re-verified
+> again on 2026-09-25: Preprod's indexer answers simple queries fine, but a
+> real wallet sync OOM-crashed twice in a row (once at default heap, once at
+> an 8 GB ceiling — heap usage roughly doubled between runs instead of
+> plateauing, i.e. unbounded growth, not a fixed memory need). Full evidence
+> in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md#preprod-network--deployment-not-currently-possible).
+> The contract code is identical across networks; Preview is the verified
+> working deployment. Preprod deployment is queued for when infrastructure
+> stabilises — run `npm run setup -- --network preprod` to deploy.
 
 ## What This Product Does
 
@@ -241,7 +246,10 @@ entry on-chain: [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
 **Preprod status:** Preprod's indexer/wallet-sync path has failed repeatedly
 across this project's history (OOM crashes and indexer fall-behind that broke
 DUST fee validity — a confirmed Midnight infrastructure issue, not a client
-bug). Preview was used as the documented identical-code-path substitution.
+bug), most recently re-verified on 2026-09-25 with two fresh wallet-sync
+attempts that both OOM-crashed (details in
+[docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md#preprod-network--deployment-not-currently-possible)).
+Preview was used as the documented identical-code-path substitution.
 Preprod deployment is queued for when infrastructure stabilises. See
 [docs/LEVEL5.md](docs/LEVEL5.md) for the full history.
 
