@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ACTIVE_NETWORK, CONTRACT_ADDRESS } from './network';
+import { ACTIVE_NETWORK } from './network';
 import { WalletProvider } from './context/WalletContext';
 import { WalletBar } from './components/WalletBar';
 import { Hero } from './components/Hero';
@@ -137,20 +137,6 @@ export default function App() {
               </a>
             </div>
           </div>
-          <div className="footer__meta-row">
-            <span className="footer__meta-item">
-              Network: <strong>{ACTIVE_NETWORK}</strong>
-            </span>
-            {CONTRACT_ADDRESS && (
-              <span className="footer__meta-item">
-                Contract: <code>{CONTRACT_ADDRESS.slice(0, 10)}…{CONTRACT_ADDRESS.slice(-6)}</code>
-              </span>
-            )}
-          </div>
-          <p className="footer__note">
-            Individual payee amounts are never shown here — only they are, by design.
-            This view only proves the running total was fully and correctly distributed.
-          </p>
         </footer>
         </div>
       </WalletProvider>
