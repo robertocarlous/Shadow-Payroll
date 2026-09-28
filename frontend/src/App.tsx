@@ -99,6 +99,23 @@ export default function App() {
         <main className="layout" id="top">
           <Hero />
 
+          <div className="mockup-section" aria-hidden="true">
+            <div className="mockup-frame">
+              <div className="mockup-frame__bar">
+                <span className="mockup-frame__dot mockup-frame__dot--red" />
+                <span className="mockup-frame__dot mockup-frame__dot--yellow" />
+                <span className="mockup-frame__dot mockup-frame__dot--green" />
+                <span className="mockup-frame__url">shadow-payroll.vercel.app/claim</span>
+              </div>
+              <img
+                src="/mockup-claim.png"
+                alt=""
+                className="mockup-frame__img"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
           <OnboardingChecklist />
 
           <ClaimPanel />

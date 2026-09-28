@@ -20,6 +20,10 @@ A wallet-connected audit dashboard with a real "Claim a payout" flow
 (runs the proof locally, submits through Lace, watches the on-chain running
 total move). See [docs/USAGE.md](docs/USAGE.md) for the step-by-step guide.
 
+The frontend was rebuilt from concrete UI references (Linear, Mercury,
+Deel) rather than iterated on blind — see [docs/DESIGN.md](docs/DESIGN.md)
+for exactly what was studied and what changed as a result.
+
 ## Contract Address
 
 | Network | Address | Status |
