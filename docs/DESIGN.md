@@ -46,10 +46,55 @@ proportions improve.
   these were structural fixes independent of the color story, and held up
   under the "is this actually different" test.
 
+## Pass 3 (2026-09-29) — references from approved Level 6 projects
+
+Pass 2 pivoted the hero to a light theme. The project owner then pointed
+to three other Midnight Level 6 submissions that had already been
+**approved**, asking for the frontend to be rebuilt in line with what was
+actually getting accepted. All three were screenshotted directly (not
+guessed from memory) and studied in full before writing any code:
+
+| Product | What was studied | What was borrowed |
+|---|---|---|
+| [Midnight Vault](https://midnight-vault-nine.vercel.app/) (approved) | Pure near-black background, one restrained glowing-moon visual with no competing decoration, a distinct dark-navy zone for the functional app below the hero, monospace numbered steps ("01 · Connect Wallet") | Confirmed dark-mode + monospace technical accents is the right register for this domain — not "avoid dark," but "avoid clutter within dark" |
+| [BallotBox](https://ballotbox-beige.vercel.app/) (approved) | A live status pill above the headline ("LIVE ON MIDNIGHT PREPROD · 71 TESTERS"), a dedicated features grid ("Everything a private vote needs, and nothing to trust"), a closing CTA banner before the footer, a richer multi-link footer | The `hero__status-pill` live-status badge, the new `Features` grid section, the `ClosingCta` banner, and the expanded footer nav (user guide / faucet / deployment log / issues) |
+| [Ghost](https://ghost-kappa-one.vercel.app/) (approved) | Fully dark end-to-end (no light section), oversized left-aligned headline, monospace technical accents throughout, real code/SDK content for credibility | Confirmed committing to dark for the *entire* page (not just the hero) reads more cohesive than a dark-hero/light-body split |
+
+**What this pass actually changed, on top of pass 2:**
+
+- **Reverted to dark end-to-end.** All three approved references are
+  dark-mode; none use a light card-soup layout. Every design token
+  (`--bg`, `--surface-glass`, `--text-primary`, etc.) was re-themed to a
+  near-black base with light text, not just the hero section. This also
+  surfaced and fixed a real bug: `.btn--primary` was styled
+  `background: var(--text-primary)` for the old light theme, which under
+  the new dark tokens made every primary button (Claim, Connect Wallet)
+  render as white-on-white. Fixed by giving `.btn--primary` the accent
+  gradient directly, which also made every primary button site-wide
+  consistently on-brand instead of only the hero's.
+- **New: a live-status pill** (`LIVE · MIDNIGHT PREVIEW · 50-PERSON
+  COHORT`) in monospace above the headline, replacing the plain eyebrow
+  label — a concrete-status convention borrowed from BallotBox rather than
+  an asserted claim.
+- **New: a features grid** (`Features.tsx`) — six concrete ZK guarantees
+  with icons, content this project never had a dedicated section for
+  before. Directly modeled on BallotBox's and Ghost's feature-grid
+  sections.
+- **New: a closing CTA banner** (`ClosingCta.tsx`) before the footer —
+  every reference project has a final conversion moment; this project
+  previously ended cold at the FAQ.
+- **Footer enriched** with a resources nav (user guide, faucet, deployment
+  log, issue tracker) instead of just two social icons — matching the
+  multi-link footers all three references use, proportional to this
+  project's smaller scope (not a full 3-column marketing footer).
+- Headline scale pushed further (`clamp(42px, 5.4vw, 78px)`, was
+  `clamp(40px, 4.6vw, 68px)`) toward Ghost's more confident scale.
+
 ## What was deliberately left alone
 
-FAQ and footer already read as intentional, not generic (accordion
-pattern, minimal footer meta row) — they weren't rebuilt for the sake of
-rebuilding. The small crescent logo mark in the nav/footer keeps its
-existing navy-violet badge colors; it's a tiny, separate brand anchor, not
-part of the hero's visual treatment.
+The small crescent logo mark in the nav/footer keeps its own navy-violet
+badge colors; it's a tiny, separate brand anchor, not part of the page's
+main visual treatment. The onboarding timeline and browser-framed
+screenshot section from pass 1 were kept as-is — structural decisions
+independent of color or theme, and none of the three new references gave
+a reason to change them.

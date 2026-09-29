@@ -1,46 +1,50 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --font-display: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
 
-  /* Brand palette — warm, light "payroll SaaS" identity. */
-  --bg: #faf9f6;
-  --bg-soft: #f3f1ec;
+  /* Dark, technical identity — the payroll SaaS light theme read as a
+     mismatch for this domain: every accepted Midnight Level 6 project is
+     dark-mode with monospace/technical accents, not a light card-soup
+     layout. See docs/DESIGN.md. */
+  --bg: #08090d;
+  --bg-soft: #0c0e15;
 
-  --surface-glass: #ffffff;
-  --surface-glass-2: #ffffff;
-  --surface-glass-3: #fcfbf8;
-  --surface-1: rgba(22, 21, 28, 0.03);
+  --surface-glass: #12141b;
+  --surface-glass-2: #14161e;
+  --surface-glass-3: #0e1015;
+  --surface-1: rgba(255, 255, 255, 0.03);
 
-  --text-primary: #16151c;
-  --text-secondary: #5c5968;
-  --text-muted: #928da0;
+  --text-primary: #f4f5f7;
+  --text-secondary: #a7acb9;
+  --text-muted: #6c7280;
 
-  --violet: #6c5ce0;
-  --violet-bright: #5a45d6;
-  --teal: #178a6c;
+  --violet: #7c6cf0;
+  --violet-bright: #8f7cf0;
+  --teal: #2dd4a8;
 
-  --accent: #0e7a54;
-  --accent-2: #0a5f40;
-  --accent-deep: #073d29;
-  --accent-grad: linear-gradient(120deg, #34d399, #0e7a54 60%, #0a5f40);
-  --accent-glow: rgba(14, 122, 84, 0.28);
-  --accent-soft: rgba(14, 122, 84, 0.1);
+  --accent: #22c58e;
+  --accent-2: #17a374;
+  --accent-deep: #0b6b4c;
+  --accent-grad: linear-gradient(120deg, #6ee7b0, #22c58e 55%, #17a374);
+  --accent-glow: rgba(34, 197, 142, 0.35);
+  --accent-soft: rgba(34, 197, 142, 0.12);
   --accent-light: #6ee7b0;
 
-  --status-good: #1f9d5c;
-  --status-critical: #d1425c;
-  --status-info: #4a5fd1;
+  --status-good: #34d399;
+  --status-critical: #f87171;
+  --status-info: #7c9cf0;
 
-  --hairline: #e8e5df;
-  --hairline-strong: #d8d4cb;
+  --hairline: rgba(255, 255, 255, 0.09);
+  --hairline-strong: rgba(255, 255, 255, 0.16);
 
-  /* The dark "terminal" surface used by the onboarding code block and the
-     claim credential textarea. */
-  --panel-dark-bg: #14121f;
-  --panel-dark-bg-2: #0e0c18;
-  --panel-dark-text: #ece9f5;
-  --panel-dark-text-soft: #a49dc2;
+  /* A recessed-darker surface for code/terminal blocks -- distinct from
+     the elevated card surface above it. */
+  --panel-dark-bg: #050609;
+  --panel-dark-bg-2: #030408;
+  --panel-dark-text: #e4e2f5;
+  --panel-dark-text-soft: #9a95b8;
   --panel-dark-hairline: rgba(255, 255, 255, 0.08);
   --panel-dark-hairline-strong: rgba(255, 255, 255, 0.14);
 
@@ -104,11 +108,11 @@ a {
   gap: 16px;
   padding: 9px 12px 9px 16px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(10, 11, 15, 0.78);
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   border: 1px solid var(--hairline);
-  box-shadow: 0 12px 30px rgba(22, 21, 28, 0.07);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 .header__brand {
@@ -279,7 +283,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: #ffffff;
+  background: var(--surface-glass);
   border-left: 1px solid var(--hairline);
   box-shadow: -24px 0 60px rgba(22, 21, 28, 0.14);
   animation: nav-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -533,7 +537,7 @@ a {
   overflow-y: auto;
   border-radius: 24px;
   padding: 34px 32px;
-  background: #ffffff;
+  background: var(--surface-glass);
   border: 1px solid var(--hairline);
   box-shadow: 0 30px 70px rgba(22, 21, 28, 0.22);
   animation: modal-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -770,23 +774,41 @@ a {
 /* max-width matches .page (1120px) so the hero column's left edge lines
    up exactly under the header/logo above it, even though the hero itself
    bleeds full-width behind it. */
-.hero__eyebrow {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--accent);
+/* A live-status pill in monospace, not a plain eyebrow label -- the kind
+   of concrete "this is really running" signal the reference projects lead
+   with (a live tester count, a verified-on-indexer badge), not asserted
+   copy. */
+.hero__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+}
+
+.hero__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--status-good);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+  flex: 0 0 auto;
 }
 
 .hero__title {
   position: relative;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(40px, 4.6vw, 68px);
-  line-height: 1.04;
+  font-size: clamp(42px, 5.4vw, 78px);
+  line-height: 1.03;
   font-weight: 700;
-  letter-spacing: -2.5px;
+  letter-spacing: -2.8px;
   color: var(--text-primary);
 }
 
@@ -818,16 +840,6 @@ a {
   align-items: center;
   gap: 22px;
   margin-top: 6px;
-}
-
-.hero__actions .btn--primary {
-  background: var(--accent-grad);
-  color: #ffffff;
-  box-shadow: 0 14px 30px -10px var(--accent-glow);
-}
-
-.hero__actions .btn--primary:hover {
-  filter: brightness(1.06);
 }
 
 .hero__link {
@@ -881,17 +893,6 @@ a {
   max-width: 20ch;
 }
 
-.hero__network {
-  margin: 0;
-  max-width: 52ch;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.hero__network strong {
-  color: var(--accent);
-}
-
 /* ---------- Layout / cards ---------- */
 
 .layout {
@@ -911,7 +912,7 @@ a {
   scroll-margin-top: 100px;
   content-visibility: auto;
   contain-intrinsic-size: auto 480px;
-  background: #ffffff;
+  background: var(--surface-glass);
   border: 1px solid var(--hairline);
   box-shadow: 0 20px 44px -18px rgba(22, 21, 28, 0.12);
 }
@@ -1276,6 +1277,61 @@ a {
   word-break: break-all;
 }
 
+/* ---------- Features grid ---------- */
+
+.features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.features__card {
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--surface-glass-2);
+  border: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.features__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent-light);
+}
+
+.features__card h3 {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.features__card p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .features__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .features__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- FAQ ---------- */
 
 .faq {
@@ -1387,16 +1443,16 @@ a {
 }
 
 .btn--primary {
-  background: var(--text-primary);
+  background: var(--accent-grad);
   color: #ffffff;
   border-color: transparent;
-  box-shadow: 0 10px 24px -8px rgba(22, 21, 28, 0.4);
+  box-shadow: 0 10px 24px -8px var(--accent-glow);
 }
 
 .btn--primary:not(:disabled):hover {
-  box-shadow: 0 14px 30px -8px rgba(22, 21, 28, 0.48);
+  box-shadow: 0 14px 30px -8px var(--accent-glow);
   transform: translateY(-1px);
-  filter: brightness(1.15);
+  filter: brightness(1.08);
 }
 
 .btn--primary:not(:disabled):active {
@@ -1412,7 +1468,19 @@ a {
   background: var(--surface-glass-3);
   border-color: var(--violet-bright);
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px -6px rgba(108, 92, 224, 0.25);
+  box-shadow: 0 8px 20px -6px rgba(124, 108, 240, 0.25);
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--hairline-strong);
+}
+
+.btn--outline:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+  transform: translateY(-1px);
 }
 
 .btn--lg {
@@ -1514,6 +1582,62 @@ a {
   font-size: 14px;
 }
 
+/* ---------- Closing CTA ---------- */
+
+.closing-cta {
+  margin-top: 8px;
+  padding: 40px 36px;
+  border-radius: 24px;
+  background: var(--bg-soft);
+  border: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.closing-cta__eyebrow {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--accent-light);
+}
+
+.closing-cta__text h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: var(--text-primary);
+  max-width: 30ch;
+}
+
+.closing-cta__actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  .closing-cta {
+    padding: 32px 24px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .closing-cta__text h2 {
+    max-width: none;
+  }
+
+  .closing-cta__actions {
+    justify-content: center;
+  }
+}
+
 /* ---------- Footer ---------- */
 
 .footer {
@@ -1538,9 +1662,26 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 20px;
   flex-wrap: wrap;
   text-align: left;
+}
+
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.footer__nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.18s ease;
+}
+
+.footer__nav a:hover {
+  color: var(--accent-light);
 }
 
 .brand-lockup {

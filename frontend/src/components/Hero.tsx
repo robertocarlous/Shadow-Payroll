@@ -2,7 +2,10 @@ export function Hero() {
   return (
     <section className="hero" id="top">
       <div className="hero__content">
-        <p className="hero__eyebrow">Private payroll on Midnight</p>
+        <div className="hero__status-pill">
+          <span className="hero__status-dot" aria-hidden="true" />
+          LIVE · MIDNIGHT PREVIEW · 50-PERSON COHORT
+        </div>
 
         <h1 className="hero__title">
           Every payout stays
@@ -40,8 +43,6 @@ export function Hero() {
             <span className="hero__stat-label">proof verifies every single claim</span>
           </div>
         </div>
-
-        <p className="hero__network">50-person Full Moon cohort · Midnight Preview network</p>
       </div>
     </section>
   );
